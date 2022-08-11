@@ -17,19 +17,20 @@ model Example {
 
 // Necessary for Next auth
 model Account {
-    id                String  @id @default(cuid())
-    userId            String
-    type              String
-    provider          String
-    providerAccountId String
-    refresh_token     String?
-    access_token      String?
-    expires_at        Int?
-    token_type        String?
-    scope             String?
-    id_token          String?
-    session_state     String?
-    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    id                       String  @id @default(cuid())
+    userId                   String
+    type                     String
+    provider                 String
+    providerAccountId        String
+    refresh_token            String?
+    access_token             String?
+    expires_at               Int?
+    token_type               String?
+    scope                    String?
+    id_token                 String?
+    session_state            String?
+    refresh_token_expires_in Int?
+    user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@unique([provider, providerAccountId])
 }
@@ -43,13 +44,15 @@ model Session {
 }
 
 model User {
-    id            String    @id @default(cuid())
+    id            String        @id @default(cuid())
     name          String?
-    email         String?   @unique
+    email         String?       @unique
     emailVerified DateTime?
     image         String?
     accounts      Account[]
     sessions      Session[]
+    listings      Listing[]
+    reservations  Reservation[]
 }
 
 model VerificationToken {
@@ -58,4 +61,38 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model DateRange {
+    id String @id @default(cuid())
+
+    start       DateTime
+    end         DateTime
+    listingId   String?      @unique
+    listing     Listing?     @relation(fields: [listingId], references: [id], onDelete: Cascade)
+    reservation Reservation?
+}
+
+model Listing {
+    id           String        @id @default(cuid())
+    name         String
+    user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId       String
+    availability DateRange?
+    reservations Reservation[]
+    images       String
+    guests       Int
+    description  String
+    latitude     String
+    longitude    String
+}
+
+model Reservation {
+    id          String    @id @default(cuid())
+    dateRange   DateRange @relation(fields: [dateRangeId], references: [id])
+    dateRangeId String    @unique
+    listingId   String
+    listing     Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+    userId      String
+    user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
