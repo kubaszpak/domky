@@ -80,7 +80,7 @@ model Listing {
     userId       String
     availability DateRange?
     reservations Reservation[]
-    images       String
+    images       String        @default("")
     guests       Int
     description  String
     latitude     String

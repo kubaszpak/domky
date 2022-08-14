@@ -1,7 +1,7 @@
-import { createRouter } from "./context";
+import { t } from "../utils";
 
-export const listingRouter = createRouter().query("all", {
-	async resolve({ ctx }) {
+export const listingRouter = t.router({
+	all: t.procedure.query(async ({ ctx }) => {
 		return await ctx.prisma.listing.findMany({
 			select: {
 				name: true,
@@ -13,5 +13,5 @@ export const listingRouter = createRouter().query("all", {
 				images: true,
 			},
 		});
-	},
+	}),
 });
