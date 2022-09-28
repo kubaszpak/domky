@@ -1,6 +1,5 @@
 import { t, authedProcedure } from "../utils";
-import z from "zod";
-import { createSchema } from "@/pages/create";
+import { createSchema } from "@/components/utils/schemas";
 
 export const authRouter = t.router({
 	getSession: t.procedure.query(({ ctx }) => {
@@ -19,10 +18,23 @@ export const authRouter = t.router({
 	createListing: authedProcedure
 		.input(createSchema)
 		.mutation(async ({ ctx, input }) => {
+			const { date_start, date_end, ...data } = input;
+			if (date_start >= date_end) {
+				const msg =
+					"Date range invalid!\nThere must be at least 1 day between startDate and endDate!";
+				console.error(msg);
+				return;
+			}
 			return await ctx.prisma.listing.create({
 				data: {
 					userId: ctx.session.user.id,
-					...input,
+					availability: {
+						create: {
+							start: date_start,
+							end: date_end,
+						},
+					},
+					...data,
 				},
 			});
 		}),

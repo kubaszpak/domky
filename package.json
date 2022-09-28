@@ -10,7 +10,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
-    "@hassanmojab/react-modern-calendar-datepicker": "^3.1.7",
+    "@googlemaps/react-wrapper": "^1.1.35",
     "@hookform/resolvers": "^2.9.7",
     "@next-auth/prisma-adapter": "^1.0.3",
     "@prisma/client": "^4.0.0",
@@ -21,6 +21,7 @@
     "next": "12.2.0",
     "next-auth": "^4.10.0",
     "react": "18.2.0",
+    "react-datepicker": "^4.8.0",
     "react-dom": "18.2.0",
     "react-hook-form": "^7.34.1",
     "react-query": "^3.39.1",
@@ -28,8 +29,10 @@
     "zod": "^3.17.3"
   },
   "devDependencies": {
+    "@types/google.maps": "^3.50.0",
     "@types/node": "18.0.0",
     "@types/react": "18.0.14",
+    "@types/react-datepicker": "^4.4.2",
     "@types/react-dom": "18.0.5",
     "autoprefixer": "^10.4.7",
     "eslint": "8.18.0",
