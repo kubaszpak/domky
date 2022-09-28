@@ -6,25 +6,8 @@ import { useZodForm } from "@/components/utils/zod";
 import { createSchema } from "@/components/utils/schemas";
 import { useEffect, useRef, useState } from "react";
 import { Wrapper } from "@googlemaps/react-wrapper";
-
-function MyMapComponent({
-	center,
-	zoom,
-}: {
-	center: google.maps.LatLngLiteral;
-	zoom: number;
-}) {
-	const ref = useRef();
-
-	useEffect(() => {
-		new window.google.maps.Map(ref.current as any, {
-			center,
-			zoom,
-		});
-	});
-
-	return <div ref={ref as any} id="map" style={{ height: "400px" }} />;
-}
+import Map from "@/components/maps/Map";
+import Marker from "@/components/maps/Marker";
 
 const ListingCreator: NextPage = () => {
 	const { register, handleSubmit, reset, formState, setValue } = useZodForm({
@@ -45,25 +28,25 @@ const ListingCreator: NextPage = () => {
 		setValue("date_end", endDate);
 	}, [startDate, endDate, setValue]);
 
-	const center = { lat: -34.397, lng: 150.644 };
-	const zoom = 4;
-	// const [clicks, setClicks] = useState<google.maps.LatLng[]>([]);
-	// const [zoom, setZoom] = useState(3); // initial zoom
-	// const [center, setCenter] = useState<google.maps.LatLngLiteral>({
-	// 	lat: 0,
-	// 	lng: 0,
-	// });
+	// const center = { lat: -34.397, lng: 150.644 };
+	// const zoom = 4;
+	const [clicks, setClicks] = useState<google.maps.LatLng[]>([]);
+	const [zoom, setZoom] = useState(3); // initial zoom
+	const [center, setCenter] = useState<google.maps.LatLngLiteral>({
+		lat: 0,
+		lng: 0,
+	});
 
-	// const onClick = (e: google.maps.MapMouseEvent) => {
-	// 	// avoid directly mutating state
-	// 	setClicks([...clicks, e.latLng!]);
-	// };
+	const onClick = (e: google.maps.MapMouseEvent) => {
+		// avoid directly mutating state
+		setClicks([...clicks, e.latLng!]);
+	};
 
-	// const onIdle = (m: google.maps.Map) => {
-	// 	console.log("onIdle");
-	// 	setZoom(m.getZoom()!);
-	// 	setCenter(m.getCenter()!.toJSON());
-	// };
+	const onIdle = (m: google.maps.Map) => {
+		console.log("onIdle");
+		setZoom(m.getZoom()!);
+		setCenter(m.getCenter()!.toJSON());
+	};
 
 	return (
 		<>
@@ -117,7 +100,19 @@ const ListingCreator: NextPage = () => {
 				</button>
 			</form>
 			<Wrapper apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
-				<MyMapComponent center={center} zoom={zoom} />
+				{/* <MyMapComponent center={center} zoom={zoom} /> */}
+				<Map
+					center={center}
+					onClick={onClick}
+					onIdle={onIdle}
+					zoom={zoom}
+					style={{ flexGrow: "1", height: "400px" }}
+				>
+					{clicks.map((latLng, i) => (
+						<Marker key={i} position={latLng} />
+					))}
+				</Map>
+				{/* style={{ height: "400px" }} */}
 			</Wrapper>
 		</>
 	);
