@@ -4,12 +4,12 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useZodForm } from "@/components/utils/zod";
 import { createSchema } from "@/components/utils/schemas";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { Wrapper } from "@googlemaps/react-wrapper";
-import Map from "@/components/maps/Map";
-import Marker from "@/components/maps/Marker";
+import Map from "@/components/maps/map";
+import Marker from "@/components/maps/marker";
 import { signIn, useSession } from "next-auth/react";
-import UploadWidget from "@/components/cloudinary/UploadWidget";
+import UploadWidget from "@/components/cloudinary/upload_widget";
 import Script from "next/script";
 import Image from "next/image";
 
@@ -36,9 +36,9 @@ const ListingCreator: NextPage = () => {
 		lat: 52.339811,
 		lng: 18.87222,
 	});
-
+	const [mainImage, setMainImage] = useState<string | null>(null);
 	const [dateError, setDateError] = useState<string | null>(null);
-	const [images, setImages] = useState<string[] | undefined>(undefined);
+	const [images, setImages] = useState<string[]>([]);
 	const [showUploadWidget, setShowUploadWidget] = useState<boolean>(false);
 	const onClick = (e: google.maps.MapMouseEvent) => {
 		// avoid directly mutating state
@@ -62,11 +62,19 @@ const ListingCreator: NextPage = () => {
 	}
 
 	const addImage = (image: string) => {
-		if (!images) {
-			setImages([image]);
-			return;
-		}
-		setImages([...images, image]);
+		setImages((image_ids) => [...image_ids!, image]);
+	};
+
+	const handleMainChange = (e: ChangeEvent<HTMLInputElement>) => {
+		setMainImage(e.currentTarget.value);
+		const imageChain =
+			e.currentTarget.value +
+			"@@@" +
+			images?.reduce((prev, curr) => {
+				return prev + "@@@" + curr;
+			}, "");
+		console.log(imageChain);
+		setValue("images", imageChain);
 	};
 
 	return (
@@ -169,13 +177,21 @@ const ListingCreator: NextPage = () => {
 			{images &&
 				images.map((image, idx) => {
 					return (
-						<Image
-							src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/${image}`}
-							key={idx}
-							alt="apartment"
-							height={600}
-							width={1000}
-						/>
+						<label key={idx}>
+							<input
+								type="radio"
+								name="main"
+								value={image}
+								checked={image === mainImage}
+								onChange={handleMainChange}
+							/>
+							<Image
+								src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/${image}`}
+								alt={`Apartment ${idx}`}
+								height={600}
+								width={1000}
+							/>
+						</label>
 					);
 				})}
 		</>

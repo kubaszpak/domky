@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { FormEvent, useState } from "react";
-import FormItem from "@/components/FormItem";
+import FormItem from "@/components/form_item";
 import Link from "next/link";
 
 const Home: NextPage = () => {

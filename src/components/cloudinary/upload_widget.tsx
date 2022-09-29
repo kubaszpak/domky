@@ -21,6 +21,7 @@ const UploadWidget: React.FC<UploadWidgetProps> = ({ addImage }) => {
 		},
 		(error: any, result: any) => {
 			if (!error && result.event === "success") {
+				console.log(result.info);
 				addImage(result.info.public_id);
 			}
 		}

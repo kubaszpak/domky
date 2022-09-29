@@ -8,4 +8,5 @@ export const createSchema = z.object({
 	latitude: z.number(),
 	date_start: z.date(),
 	date_end: z.date(),
+	images: z.string().max(500),
 });
