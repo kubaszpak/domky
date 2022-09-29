@@ -83,8 +83,8 @@ model Listing {
     images       String        @default("")
     guests       Int
     description  String
-    latitude     String
-    longitude    String
+    latitude     Float
+    longitude    Float
 }
 
 model Reservation {
