@@ -1,5 +1,5 @@
 import { isLatLngLiteral } from "@googlemaps/typescript-guards";
-import { createCustomEqual } from "fast-equals";
+import { createCustomEqual, deepEqual } from "fast-equals";
 import React, { useEffect, useRef, useState } from "react";
 
 interface MapProps extends google.maps.MapOptions {
@@ -62,7 +62,8 @@ const Map: React.FC<MapProps> = ({
 	);
 };
 
-const deepCompareEqualsForMaps = createCustomEqual((deepEqual) => (a: any, b: any) => {
+const deepCompareEqualsForMaps = createCustomEqual(() => ({
+	areObjectsEqual: (a, b) => {
 		if (
 			isLatLngLiteral(a) ||
 			a instanceof google.maps.LatLng ||
@@ -72,10 +73,9 @@ const deepCompareEqualsForMaps = createCustomEqual((deepEqual) => (a: any, b: an
 			return new google.maps.LatLng(a).equals(new google.maps.LatLng(b));
 		}
 
-		// use fast-equals for other objects
 		return deepEqual(a, b);
-	}
-);
+	},
+}));
 
 function useDeepCompareMemoize(value: any) {
 	const ref = React.useRef();
@@ -91,7 +91,7 @@ function useDeepCompareEffectForMaps(
 	callback: React.EffectCallback,
 	dependencies: any[]
 ) {
-	React.useEffect(callback, dependencies.map(useDeepCompareMemoize));
+	useEffect(callback, dependencies.map(useDeepCompareMemoize));
 }
 
 export default Map;
