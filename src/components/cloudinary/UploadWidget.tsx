@@ -1,13 +1,28 @@
 import React from "react";
 
-const UploadWidget: React.FC<{}> = () => {
+interface UploadWidgetProps {
+	addImage: (image: string) => void;
+}
+
+const UploadWidget: React.FC<UploadWidgetProps> = ({ addImage }) => {
 	let widget = window.cloudinary.createUploadWidget(
 		{
-			cloudName: "kubaszpak",
-			uploadPreset: "default_unsigned",
+			cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+			uploadPreset: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET,
+			sources: ["local", "url", "camera", "dropbox", "google_drive"],
+			maxFiles: 8,
+			resourceType: "image",
+			maxFileSize: 5000000,
+			maxImageWidth: 3000,
+			maxImageHeight: 2000,
+			clientAllowedFormats: ["png", "jpg", "jpeg"],
+			minImageWidth: 400,
+			minImageHeight: 300,
 		},
 		(error: any, result: any) => {
-			console.log(result, error);
+			if (!error && result.event === "success") {
+				addImage(result.info.public_id);
+			}
 		}
 	);
 

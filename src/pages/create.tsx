@@ -11,6 +11,7 @@ import Marker from "@/components/maps/Marker";
 import { signIn, useSession } from "next-auth/react";
 import UploadWidget from "@/components/cloudinary/UploadWidget";
 import Script from "next/script";
+import Image from "next/image";
 
 const ListingCreator: NextPage = () => {
 	const { data: session, status } = useSession();
@@ -23,8 +24,6 @@ const ListingCreator: NextPage = () => {
 	const mutation = trpc.proxy.auth.createListing.useMutation();
 	const [startDate, setStartDate] = useState(new Date());
 	const [endDate, setEndDate] = useState(new Date());
-	const [url, setUrl] = useState("");
-	console.log(formState.errors);
 
 	useEffect(() => {
 		setValue("date_start", startDate);
@@ -38,27 +37,8 @@ const ListingCreator: NextPage = () => {
 		lng: 0,
 	});
 
-	const uploadImage = () => {
-		if (!image) return;
-		const formData = new FormData();
-		formData.append("file", image);
-		formData.append("upload_preset", "default_unsigned");
-		formData.append("cloud_name", "kubaszpak");
-		fetch("https://api.cloudinary.com/v1_1/kubaszpak/image/upload", {
-			method: "post",
-			body: formData,
-		})
-			.then((resp) => resp.json())
-			.then((data) => {
-				console.log(data);
-				setUrl(data.url);
-			})
-			.catch((err) => console.log(err));
-		console.log(image);
-	};
-
 	const [dateError, setDateError] = useState<string | null>(null);
-	const [image, setImage] = useState<File | undefined>(undefined);
+	const [images, setImages] = useState<string[] | undefined>(undefined);
 	const [showUploadWidget, setShowUploadWidget] = useState<boolean>(false);
 	const onClick = (e: google.maps.MapMouseEvent) => {
 		// avoid directly mutating state
@@ -80,6 +60,14 @@ const ListingCreator: NextPage = () => {
 			</>
 		);
 	}
+
+	const addImage = (image: string) => {
+		if (!images) {
+			setImages([image]);
+			return;
+		}
+		setImages([...images, image]);
+	};
 
 	return (
 		<>
@@ -105,17 +93,7 @@ const ListingCreator: NextPage = () => {
 				}}
 			/>
 			{dateError && <p className="text-red-700">{dateError}</p>}
-			<label>
-				Name
-				<br />
-				<input
-					type="file"
-					accept=".jpg,.png,.jpeg"
-					onChange={(e) => setImage(e.target.files![0])}
-				/>
-			</label>
 			<br />
-			<button onClick={uploadImage}>Upload</button>
 			<form
 				className="space-y-2"
 				onSubmit={handleSubmit(async (values) => {
@@ -187,8 +165,19 @@ const ListingCreator: NextPage = () => {
 				formState.errors.longitude?.message) && (
 				<p className="text-red-700">{"Put a marker on the map to continue!"}</p>
 			)}
-			<img src={url} />
-			{showUploadWidget && <UploadWidget />}
+			{showUploadWidget && <UploadWidget addImage={addImage} />}
+			{images &&
+				images.map((image, idx) => {
+					return (
+						<Image
+							src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/${image}`}
+							key={idx}
+							alt="apartment"
+							height={600}
+							width={1000}
+						/>
+					);
+				})}
 		</>
 	);
 };
