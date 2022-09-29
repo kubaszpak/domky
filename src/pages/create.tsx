@@ -31,10 +31,10 @@ const ListingCreator: NextPage = () => {
 	}, [startDate, endDate, setValue]);
 
 	const [marker, setMarker] = useState<google.maps.LatLng | null>(null);
-	const [zoom, setZoom] = useState(3); // initial zoom
+	const [zoom, setZoom] = useState(7); // initial zoom
 	const [center, setCenter] = useState<google.maps.LatLngLiteral>({
-		lat: 0,
-		lng: 0,
+		lat: 52.339811,
+		lng: 18.87222,
 	});
 
 	const [dateError, setDateError] = useState<string | null>(null);

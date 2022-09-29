@@ -3,6 +3,7 @@ import Head from "next/head";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { FormEvent, useState } from "react";
 import FormItem from "@/components/FormItem";
+import Link from "next/link";
 
 const Home: NextPage = () => {
 	const { data: session, status } = useSession();
@@ -55,6 +56,11 @@ const Home: NextPage = () => {
 			<div className="flex gap-4 justify-end px-8 py-4 relative">
 				{status === "authenticated" ? (
 					<>
+						<Link href={"/create"}>
+							<a>
+								<b>Create a Listing</b>
+							</a>
+						</Link>
 						Signed in as {session.user?.name} <br />
 						<button onClick={() => signOut()}>Sign out</button>
 					</>

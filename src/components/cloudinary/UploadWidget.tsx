@@ -33,7 +33,12 @@ const UploadWidget: React.FC<UploadWidgetProps> = ({ addImage }) => {
 	return (
 		<>
 			<div>
-				<button onClick={showWidget}>Upload images</button>
+				<button
+					className="text-center text-indigo-400 font-bold rounded py-2 w-2/12 focus:outline-none bg-gray-900 border-2 border-indigo-400"
+					onClick={showWidget}
+				>
+					Upload images
+				</button>
 			</div>
 		</>
 	);
