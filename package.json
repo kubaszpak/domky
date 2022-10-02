@@ -10,6 +10,7 @@
 		"postinstall": "prisma generate"
 	},
 	"dependencies": {
+		"@datepicker-react/styled": "^2.8.4",
 		"@googlemaps/react-wrapper": "^1.1.35",
 		"@googlemaps/typescript-guards": "^2.0.3",
 		"@hookform/resolvers": "^2.9.7",

@@ -10,7 +10,6 @@ import Map from "@/components/maps/map";
 import Marker from "@/components/maps/marker";
 import { signIn, useSession } from "next-auth/react";
 import UploadWidget from "@/components/cloudinary/upload_widget";
-import Script from "next/script";
 import Image from "next/image";
 
 const ListingCreator: NextPage = () => {
@@ -39,10 +38,10 @@ const ListingCreator: NextPage = () => {
 	const [mainImage, setMainImage] = useState<string | null>(null);
 	const [dateError, setDateError] = useState<string | null>(null);
 	const [images, setImages] = useState<string[]>([]);
-	const [showUploadWidget, setShowUploadWidget] = useState<boolean>(false);
 	const onClick = (e: google.maps.MapMouseEvent) => {
 		// avoid directly mutating state
 		setMarker(e.latLng!);
+		// console.log(e.latLng.)
 		setValue("longitude", e.latLng!.toJSON().lng);
 		setValue("latitude", e.latLng!.toJSON().lat);
 	};
@@ -79,13 +78,6 @@ const ListingCreator: NextPage = () => {
 
 	return (
 		<>
-			<Script
-				src="https://upload-widget.cloudinary.com/global/all.js"
-				type="text/javascript"
-				onLoad={() => {
-					setShowUploadWidget(true);
-				}}
-			/>
 			<DatePicker
 				selected={startDate}
 				onChange={(date: Date) => {
@@ -173,7 +165,7 @@ const ListingCreator: NextPage = () => {
 				formState.errors.longitude?.message) && (
 				<p className="text-red-700">{"Put a marker on the map to continue!"}</p>
 			)}
-			{showUploadWidget && <UploadWidget addImage={addImage} />}
+			<UploadWidget addImage={addImage} />
 			{images &&
 				images.map((image, idx) => {
 					return (
@@ -188,8 +180,8 @@ const ListingCreator: NextPage = () => {
 							<Image
 								src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/${image}`}
 								alt={`Apartment ${idx}`}
-								height={600}
-								width={1000}
+								height={1080}
+								width={1920}
 							/>
 						</label>
 					);

@@ -4,19 +4,58 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import { FormEvent, useState } from "react";
 import FormItem from "@/components/form_item";
 import Link from "next/link";
+import {
+	DateRangeInput,
+	FocusedInput,
+	OnDatesChangeProps,
+} from "@datepicker-react/styled";
+import React, { useReducer } from "react";
+
+const FOCUS_CHANGE = "focusChange";
+type FOCUS_CHANGE = typeof FOCUS_CHANGE;
+const DATE_CHANGE = "dateChange";
+type DATE_CHANGE = typeof DATE_CHANGE;
+
+const initialState: OnDatesChangeProps = {
+	startDate: null,
+	endDate: null,
+	focusedInput: null,
+};
+
+interface DateChangeAction {
+	type: DATE_CHANGE;
+	payload: OnDatesChangeProps;
+}
+
+interface FocusChangeAction {
+	type: FOCUS_CHANGE;
+	payload: FocusedInput;
+}
+
+function reducer(
+	state: OnDatesChangeProps,
+	action: DateChangeAction | FocusChangeAction
+) {
+	switch (action.type) {
+		case FOCUS_CHANGE:
+			return { ...state, focusedInput: action.payload };
+		case DATE_CHANGE:
+			console.log(action.payload);
+			return action.payload;
+		default:
+			throw new Error();
+	}
+}
 
 const Home: NextPage = () => {
 	const { data: session, status } = useSession();
-	const [when_from, setWhen_from] = useState("");
-	const [when_to, setWhen_to] = useState("");
 	const [where, setWhere] = useState("");
 	const [guests, setGuests] = useState("");
+	const [state, dispatch] = useReducer(reducer, initialState);
 
 	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		console.log(
-			`Looking for listings in ${where} from ${when_from} to ${when_to} for ${guests} people`
-		);
+		console.log("Looking ...");
 	};
 
 	return (
@@ -32,17 +71,18 @@ const Home: NextPage = () => {
 					onSubmit={handleSubmit}
 				>
 					<FormItem name="where" value={where} valueSetter={setWhere} />
-					<FormItem
-						name="from"
-						value={when_from}
-						valueSetter={setWhen_from}
-						type="date"
-					/>
-					<FormItem
-						name="to"
-						value={when_to}
-						valueSetter={setWhen_to}
-						type="date"
+					<DateRangeInput
+						onDatesChange={(data) =>
+							dispatch({ type: DATE_CHANGE, payload: data })
+						}
+						onFocusChange={(focusedInput) =>
+							dispatch({ type: FOCUS_CHANGE, payload: focusedInput })
+						}
+						minBookingDays={2}
+						minBookingDate={new Date()}
+						startDate={state.startDate} // Date or null
+						endDate={state.endDate} // Date or null
+						focusedInput={state.focusedInput} // START_DATE, END_DATE or null
 					/>
 					<FormItem
 						name="guests"

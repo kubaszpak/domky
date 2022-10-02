@@ -5,7 +5,7 @@ interface UploadWidgetProps {
 }
 
 const UploadWidget: React.FC<UploadWidgetProps> = ({ addImage }) => {
-	let widget = window.cloudinary.createUploadWidget(
+	const widget = window.cloudinary.createUploadWidget(
 		{
 			cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
 			uploadPreset: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET,
@@ -15,6 +15,9 @@ const UploadWidget: React.FC<UploadWidgetProps> = ({ addImage }) => {
 			maxFileSize: 5000000,
 			maxImageWidth: 3000,
 			maxImageHeight: 2000,
+			cropping: true,
+			showSkipCropButton: false,
+			croppingAspectRatio: 16 / 9,
 			clientAllowedFormats: ["png", "jpg", "jpeg"],
 			minImageWidth: 400,
 			minImageHeight: 300,
