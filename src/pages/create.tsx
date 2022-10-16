@@ -13,7 +13,7 @@ import UploadWidget from "@/components/cloudinary/upload_widget";
 import Image from "next/image";
 
 const ListingCreator: NextPage = () => {
-	const { data: session, status } = useSession();
+	const { status } = useSession();
 	const { register, handleSubmit, reset, formState, setValue } = useZodForm({
 		schema: createSchema,
 		defaultValues: {

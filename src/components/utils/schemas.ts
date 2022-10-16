@@ -10,3 +10,10 @@ export const createSchema = z.object({
 	date_end: z.date(),
 	images: z.string().max(500),
 });
+
+export const searchSchema = z.object({
+	where: z.string(),
+	guests: z.number().positive().max(10),
+	date_start: z.date(),
+	date_end: z.date()
+})
