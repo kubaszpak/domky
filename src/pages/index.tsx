@@ -1,35 +1,23 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import { useState } from "react";
-import {
-	DateRangeInput,
-	FocusedInput,
-	OnDatesChangeProps,
-} from "@datepicker-react/styled";
+import { DateRangeInput, OnDatesChangeProps } from "@datepicker-react/styled";
 import React, { useReducer } from "react";
 import { useZodForm } from "@/components/utils/zod";
 import { searchSchema } from "@/components/utils/schemas";
-
-const FOCUS_CHANGE = "focusChange";
-type FOCUS_CHANGE = typeof FOCUS_CHANGE;
-const DATE_CHANGE = "dateChange";
-type DATE_CHANGE = typeof DATE_CHANGE;
+import {
+	DateChangeAction,
+	DATE_CHANGE,
+	FocusChangeAction,
+	FOCUS_CHANGE,
+} from "@/types/dates";
+import { useLoadScript } from "@react-google-maps/api";
+import Autocomplete from "@/components/maps/autocomplete";
 
 const initialState: OnDatesChangeProps = {
 	startDate: null,
 	endDate: null,
 	focusedInput: null,
 };
-
-interface DateChangeAction {
-	type: DATE_CHANGE;
-	payload: OnDatesChangeProps;
-}
-
-interface FocusChangeAction {
-	type: FOCUS_CHANGE;
-	payload: FocusedInput;
-}
 
 function reducer(
 	state: OnDatesChangeProps,
@@ -46,15 +34,32 @@ function reducer(
 }
 
 const Home: NextPage = () => {
-	const [where, setWhere] = useState("");
-	const [guests, setGuests] = useState("");
+	const { isLoaded } = useLoadScript({
+		googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
+		libraries: ["places"],
+	});
+
 	const [state, dispatch] = useReducer(reducer, initialState);
-	const { register, handleSubmit, reset, formState, setValue } = useZodForm({
+	const {
+		register,
+		handleSubmit,
+		reset,
+		setValue: setFormValue,
+		watch,
+		formState,
+	} = useZodForm({
 		schema: searchSchema,
 		defaultValues: {
 			guests: 1,
 		},
 	});
+
+	// const where = watch("where");
+
+	// useEffect(() => {
+	// 	isLoaded && init()
+	// 	setValue(where);
+	// }, [where, setValue, isLoaded, init]);
 
 	return (
 		<>
@@ -71,28 +76,16 @@ const Home: NextPage = () => {
 				className="flex flex-col lg:flex-row items-center lg:items-end justify-center gap-4 min-h-[80vh] lg:min-h-[40vh]"
 			>
 				{/* <FormItem name="where" value={where} valueSetter={setWhere} /> */}
-				<div>
-					<label
-						htmlFor="where"
-						className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-					>
-						Where
-					</label>
-					<input
-						type="text"
-						id="where"
-						className="date-input border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-						placeholder="Where"
-						required
-					/>
-				</div>
+				{isLoaded && <Autocomplete {...register("where")} />}
 				<label className="date-range-picker block text-sm font-medium text-gray-900 dark:text-gray-300">
 					Dates
 					<div className="mt-2">
 						<DateRangeInput
-							onDatesChange={(data) =>
-								dispatch({ type: DATE_CHANGE, payload: data })
-							}
+							onDatesChange={(data) => {
+								data.startDate && setFormValue("date_start", data.startDate);
+								data.endDate && setFormValue("date_end", data.endDate);
+								dispatch({ type: DATE_CHANGE, payload: data });
+							}}
 							onFocusChange={(focusedInput) =>
 								dispatch({ type: FOCUS_CHANGE, payload: focusedInput })
 							}
@@ -115,9 +108,10 @@ const Home: NextPage = () => {
 					<input
 						type="number"
 						id="guests"
-						className="date-input border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+						className="date-input border border-[#BCBEC0] text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
 						placeholder="Guests"
 						required
+						{...register("guests")}
 					/>
 				</div>
 				<button
