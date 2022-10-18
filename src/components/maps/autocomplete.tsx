@@ -1,9 +1,13 @@
 import React from "react";
 import usePlacesAutocomplete from "use-places-autocomplete";
 
-interface AutocompleteProps {}
+interface AutocompleteProps {
+	value: string;
+	onChange: (...event: any[]) => void;
+}
 
-const Autocomplete = React.forwardRef<HTMLInputElement>((props, ref) => {
+const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps
+>((props, ref) => {
 	const {
 		ready,
 		value,
