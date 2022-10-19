@@ -12,6 +12,7 @@ import {
 } from "@/types/dates";
 import { useLoadScript } from "@react-google-maps/api";
 import Autocomplete from "@/components/maps/autocomplete";
+import { Controller } from "react-hook-form";
 
 const initialState: OnDatesChangeProps = {
 	startDate: null,
@@ -47,6 +48,7 @@ const Home: NextPage = () => {
 		setValue: setFormValue,
 		watch,
 		formState,
+		control,
 	} = useZodForm({
 		schema: searchSchema,
 		defaultValues: {
@@ -60,7 +62,9 @@ const Home: NextPage = () => {
 	// 	isLoaded && init()
 	// 	setValue(where);
 	// }, [where, setValue, isLoaded, init]);
-	formState.errors && console.log(formState.errors);
+
+	console.log(formState.errors)
+
 	return (
 		<>
 			<Head>
@@ -76,7 +80,15 @@ const Home: NextPage = () => {
 				className="flex flex-col lg:flex-row items-center lg:items-end justify-center gap-4 min-h-[80vh] lg:min-h-[40vh]"
 			>
 				{/* <FormItem name="where" value={where} valueSetter={setWhere} /> */}
-				{isLoaded && <Autocomplete {...register("where")} />}
+				{isLoaded && (
+					<Controller
+						name="where"
+						control={control}
+						render={({ field }) => (
+							<Autocomplete {...field} />
+						)}
+					/>
+				)}
 				<label className="date-range-picker block text-sm font-medium text-gray-900 dark:text-gray-300">
 					Dates
 					<div className="mt-2">
