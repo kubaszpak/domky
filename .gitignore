@@ -37,4 +37,3 @@ yarn-error.log*
 
 db.sqlite
 ./swc
-src/components/utils/use_window_size.ts

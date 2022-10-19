@@ -1,18 +1,19 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import { DateRangeInput, OnDatesChangeProps } from "@datepicker-react/styled";
-import React, { useReducer } from "react";
+import React, { useReducer, useState } from "react";
 import { useZodForm } from "@/components/utils/zod";
 import { searchSchema } from "@/components/utils/schemas";
+import { useLoadScript } from "@react-google-maps/api";
+import Autocomplete from "@/components/maps/autocomplete";
+import { Controller } from "react-hook-form";
 import {
 	DateChangeAction,
 	DATE_CHANGE,
 	FocusChangeAction,
 	FOCUS_CHANGE,
 } from "@/types/dates";
-import { useLoadScript } from "@react-google-maps/api";
-import Autocomplete from "@/components/maps/autocomplete";
-import { Controller } from "react-hook-form";
+import useWindowSize from "@/components/utils/use_window_size";
 
 const initialState: OnDatesChangeProps = {
 	startDate: null,
@@ -35,9 +36,11 @@ function reducer(
 }
 
 const Home: NextPage = () => {
+	const [width] = useWindowSize();
+	const [libraries] = useState<Libraries>(["places"]);
 	const { isLoaded } = useLoadScript({
 		googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
-		libraries: ["places"],
+		libraries,
 	});
 
 	const [state, dispatch] = useReducer(reducer, initialState);
@@ -46,8 +49,6 @@ const Home: NextPage = () => {
 		handleSubmit,
 		reset,
 		setValue: setFormValue,
-		watch,
-		formState,
 		control,
 	} = useZodForm({
 		schema: searchSchema,
@@ -55,15 +56,6 @@ const Home: NextPage = () => {
 			guests: 1,
 		},
 	});
-
-	// const where = watch("where");
-
-	// useEffect(() => {
-	// 	isLoaded && init()
-	// 	setValue(where);
-	// }, [where, setValue, isLoaded, init]);
-
-	console.log(formState.errors)
 
 	return (
 		<>
@@ -79,19 +71,20 @@ const Home: NextPage = () => {
 				})}
 				className="flex flex-col lg:flex-row items-center lg:items-end justify-center gap-4 min-h-[80vh] lg:min-h-[40vh]"
 			>
-				{/* <FormItem name="where" value={where} valueSetter={setWhere} /> */}
 				{isLoaded && (
 					<Controller
 						name="where"
 						control={control}
-						render={({ field }) => (
-							<Autocomplete {...field} />
+						render={({ field: { onChange, ref } }) => (
+							<Autocomplete onChange={onChange} ref={ref} />
 						)}
 					/>
 				)}
-				<label className="date-range-picker block text-sm font-medium text-gray-900 dark:text-gray-300">
-					Dates
-					<div className="mt-2">
+				<div>
+					<label className="block text-sm font-medium text-gray-900 dark:text-gray-300 mb-2">
+						Dates
+					</label>
+					<div className="date-range-picker">
 						<DateRangeInput
 							onDatesChange={(data) => {
 								data.startDate && setFormValue("date_start", data.startDate);
@@ -101,6 +94,7 @@ const Home: NextPage = () => {
 							onFocusChange={(focusedInput) =>
 								dispatch({ type: FOCUS_CHANGE, payload: focusedInput })
 							}
+							vertical={width! < 640}
 							showClose={false}
 							minBookingDays={2}
 							minBookingDate={new Date()}
@@ -109,7 +103,7 @@ const Home: NextPage = () => {
 							focusedInput={state.focusedInput} // START_DATE, END_DATE or null
 						/>
 					</div>
-				</label>
+				</div>
 				<div>
 					<label
 						htmlFor="guests"

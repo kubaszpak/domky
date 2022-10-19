@@ -22,12 +22,12 @@ input {
 }
 
 @media only screen and (max-width: 640px) {
-	.date-range-picker > div > div > div {
+	.date-range-picker > div > div {
 		grid-template-columns: none;
 		grid-template-rows: 1fr 24px 1fr;
 	}
 
 	.date-input {
-		width: 285px;
+		width: 235px;
 	}
 }

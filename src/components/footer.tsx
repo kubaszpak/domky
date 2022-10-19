@@ -5,7 +5,7 @@ export default function Footer() {
 	const { data: session, status } = useSession();
 
 	return (
-		<div className="flex gap-4 justify-end px-8 py-4 absolute bottom-0 left-0 w-full">
+		<div className="flex gap-4 justify-end px-8 py-4 absolute bottom-0 left-0 w-full z-[-1]">
 			{status === "authenticated" ? (
 				<>
 					<Link href={"/create"}>
