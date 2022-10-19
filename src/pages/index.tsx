@@ -63,6 +63,8 @@ const Home: NextPage = () => {
 	// 	setValue(where);
 	// }, [where, setValue, isLoaded, init]);
 
+	console.log(formState.errors)
+
 	return (
 		<>
 			<Head>
@@ -82,8 +84,8 @@ const Home: NextPage = () => {
 					<Controller
 						name="where"
 						control={control}
-						render={({ field: { onChange, value, ref } }) => (
-							<Autocomplete value={value} onChange={onChange} ref={ref} />
+						render={({ field }) => (
+							<Autocomplete {...field} />
 						)}
 					/>
 				)}
