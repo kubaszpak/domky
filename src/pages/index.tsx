@@ -60,7 +60,7 @@ const Home: NextPage = () => {
 	// 	isLoaded && init()
 	// 	setValue(where);
 	// }, [where, setValue, isLoaded, init]);
-
+	formState.errors && console.log(formState.errors);
 	return (
 		<>
 			<Head>
@@ -111,7 +111,9 @@ const Home: NextPage = () => {
 						className="date-input border border-[#BCBEC0] text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
 						placeholder="Guests"
 						required
-						{...register("guests")}
+						{...register("guests", {
+							valueAsNumber: true,
+						})}
 					/>
 				</div>
 				<button
