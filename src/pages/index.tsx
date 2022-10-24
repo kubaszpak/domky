@@ -8,32 +8,12 @@ import { useLoadScript } from "@react-google-maps/api";
 import Autocomplete from "@/components/maps/autocomplete";
 import { Controller } from "react-hook-form";
 import {
-	DateChangeAction,
 	DATE_CHANGE,
-	FocusChangeAction,
 	FOCUS_CHANGE,
+	initialState,
+	reducer,
 } from "@/types/dates";
 import useWindowSize from "@/components/utils/use_window_size";
-
-const initialState: OnDatesChangeProps = {
-	startDate: null,
-	endDate: null,
-	focusedInput: null,
-};
-
-function reducer(
-	state: OnDatesChangeProps,
-	action: DateChangeAction | FocusChangeAction
-) {
-	switch (action.type) {
-		case FOCUS_CHANGE:
-			return { ...state, focusedInput: action.payload };
-		case DATE_CHANGE:
-			return action.payload;
-		default:
-			throw new Error();
-	}
-}
 
 const Home: NextPage = () => {
 	const [width] = useWindowSize();
