@@ -88,7 +88,7 @@ const ListingCreator: NextPage = () => {
 
 	return (
 		<form
-			className="space-y-2 m-10"
+			className="space-y-2 m-10 max-w-6xl xl:mx-auto"
 			onSubmit={handleSubmit(async (values) => {
 				await mutation.mutateAsync(values);
 				reset();
