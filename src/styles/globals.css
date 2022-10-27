@@ -42,7 +42,8 @@ input {
 
 .selected-img > span {
 	border: 10px solid !important;
-	border-image-slice: 1 !important;
 	border-width: 10px !important;
 	border-image-source: linear-gradient(to left, #06b6d4, #3b82f6) !important;
+	border-image-slice: 1 !important;
+	border-style: solid;
 }
