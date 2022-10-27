@@ -15,7 +15,6 @@ export default function Document() {
 				<NextScript />
 				<Script
 					src="https://upload-widget.cloudinary.com/global/all.js"
-					type="text/javascript"
 					strategy="beforeInteractive"
 				/>
 			</body>

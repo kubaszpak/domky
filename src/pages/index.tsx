@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import { DateRangeInput, OnDatesChangeProps } from "@datepicker-react/styled";
+import { DateRangeInput } from "@datepicker-react/styled";
 import React, { useReducer, useState } from "react";
 import { useZodForm } from "@/components/utils/zod";
 import { searchSchema } from "@/components/utils/schemas";

@@ -5,10 +5,12 @@
 body {
 	font-family: "Poppins", sans-serif;
 	margin: 0;
+	box-sizing: border-box;
 }
 
 .date-range-picker * {
 	font-family: "Poppins", sans-serif !important;
+	z-index: 10;
 }
 
 .date-range-picker label,
@@ -30,4 +32,17 @@ input {
 	.date-input {
 		width: 235px;
 	}
+}
+
+@media (min-width: 768px) {
+	.grid-equal-col {
+		grid-template-columns: 1fr 1fr;
+	}
+}
+
+.selected-img > span {
+	border: 10px solid !important;
+	border-image-slice: 1 !important;
+	border-width: 10px !important;
+	border-image-source: linear-gradient(to left, #06b6d4, #3b82f6) !important;
 }

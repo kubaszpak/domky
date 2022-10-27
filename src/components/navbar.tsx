@@ -1,7 +1,10 @@
+import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Navbar() {
+	const { data: session, status } = useSession();
+
 	return (
 		<header className="w-full flex justify-between items-center">
 			<div className="m-3 ml-5 cursor-grab flex items-center">
@@ -16,9 +19,19 @@ export default function Navbar() {
 					/>
 				</Link>
 			</div>
-			<div className="flex flex-end gap-6 justify-center items-center">
-				<a>Host</a>
-				<a className="mr-6">Profile</a>
+			<div className="flex flex-end gap-6 justify-center items-center mr-5">
+				{status === "authenticated" ? (
+					<>
+						<Link href={"/create"}>
+							<a>
+								<b>Create</b>
+							</a>
+						</Link>
+						<button onClick={() => signOut()}>Sign out</button>
+					</>
+				) : (
+					<button onClick={() => signIn()}>Sign in</button>
+				)}
 			</div>
 		</header>
 	);
