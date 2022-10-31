@@ -34,6 +34,7 @@ model Account {
     user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@unique([provider, providerAccountId])
+    @@index([userId])
 }
 
 model Session {
@@ -42,6 +43,8 @@ model Session {
     userId       String
     expires      DateTime
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
 }
 
 model User {
@@ -72,6 +75,8 @@ model DateRange {
     listingId   String?      @unique
     listing     Listing?     @relation(fields: [listingId], references: [id], onDelete: Cascade)
     reservation Reservation?
+
+    @@index([listingId])
 }
 
 model Listing {
@@ -87,6 +92,8 @@ model Listing {
     latitude     Float
     longitude    Float
     city         String
+
+    @@index([userId])
 }
 
 model Reservation {
@@ -97,4 +104,6 @@ model Reservation {
     listing     Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
     userId      String
     user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([dateRangeId, userId, listingId])
 }
