@@ -37,3 +37,5 @@ yarn-error.log*
 
 db.sqlite
 ./swc
+public/static/images/logo-old.svg
+src/components/utils/use_debounce.ts

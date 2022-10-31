@@ -2,13 +2,7 @@ import { trpc } from "@/utils/trpc";
 import type { NextPage } from "next";
 import { useZodForm } from "@/components/utils/zod";
 import { createSchema } from "@/components/utils/schemas";
-import {
-	MouseEvent,
-	useCallback,
-	useEffect,
-	useReducer,
-	useState,
-} from "react";
+import { useCallback, useEffect, useReducer, useState } from "react";
 import { Wrapper } from "@googlemaps/react-wrapper";
 import Map from "@/components/maps/map";
 import Marker from "@/components/maps/marker";
@@ -25,16 +19,17 @@ import { DateRangeInput } from "@datepicker-react/styled";
 import useWindowSize from "@/components/utils/use_window_size";
 
 const ListingCreator: NextPage = () => {
-	const [width] = useWindowSize();
-	const { status } = useSession();
 	const { register, handleSubmit, reset, formState, setValue } = useZodForm({
 		schema: createSchema,
 		defaultValues: {
 			guests: 1,
+			city: "",
 		},
 	});
-
+	const { status } = useSession();
+	const [width] = useWindowSize();
 	const [state, dispatch] = useReducer(reducer, initialState);
+
 	const mutation = trpc.proxy.auth.createListing.useMutation();
 
 	const [marker, setMarker] = useState<google.maps.LatLng | null>(null);
@@ -43,9 +38,10 @@ const ListingCreator: NextPage = () => {
 		lat: 52.339811,
 		lng: 18.87222,
 	});
+
 	const [mainImage, setMainImage] = useState<string | null>(null);
-	const [dateError, setDateError] = useState<string | null>(null);
 	const [images, setImages] = useState<string[]>([]);
+	const [enterCityManually, setEnterCityManually] = useState(false);
 
 	const onClick = (e: google.maps.MapMouseEvent) => {
 		setMarker(e.latLng!);
@@ -77,6 +73,32 @@ const ListingCreator: NextPage = () => {
 		createNewImageChain();
 	}, [images, mainImage, createNewImageChain]);
 
+	useEffect(() => {
+		if (!marker) return;
+		const formattedLatLng = `${marker?.lat()}, ${marker?.lng()}`;
+		async function geocode() {
+			fetch(
+				`https://maps.googleapis.com/maps/api/geocode/json?latlng=${formattedLatLng}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
+			)
+				.then((data) => {
+					if (data.ok) return data.json();
+				})
+				.then((json) => {
+					const cityData = json.results[0]?.address_components?.filter(
+						(ac: any) => ac.types?.includes("locality")
+					)[0];
+					if (cityData) {
+						setValue("city", cityData.long_name);
+						setEnterCityManually(false);
+						return;
+					}
+					setValue("city", "");
+					setEnterCityManually(true);
+				});
+		}
+		geocode();
+	}, [marker, setValue]);
+
 	if (status !== "authenticated") {
 		return (
 			<>
@@ -92,6 +114,7 @@ const ListingCreator: NextPage = () => {
 			onSubmit={handleSubmit(async (values) => {
 				await mutation.mutateAsync(values);
 				reset();
+				setMarker(null);
 				setImages([]);
 			})}
 		>
@@ -120,8 +143,11 @@ const ListingCreator: NextPage = () => {
 								focusedInput={state.focusedInput} // START_DATE, END_DATE or null
 							/>
 						</div>
+						{(formState.errors.date_start?.message ||
+							formState.errors.date_end?.message) && (
+							<p className="text-red-700">{"Select a valid date range!"}</p>
+						)}
 					</div>
-					{dateError && <p className="text-red-700">{dateError}</p>}
 					<div>
 						<label
 							htmlFor="name"
@@ -177,6 +203,9 @@ const ListingCreator: NextPage = () => {
 					<div className="my-3">
 						<UploadWidget addImage={addImage} />
 					</div>
+					{formState.errors.images?.message && (
+						<p className="text-red-700">{formState.errors.guests?.message}</p>
+					)}
 				</div>
 				<div>
 					<label className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
@@ -194,9 +223,10 @@ const ListingCreator: NextPage = () => {
 						</Map>
 					</Wrapper>
 					{(formState.errors.latitude?.message ||
-						formState.errors.longitude?.message) && (
+						formState.errors.longitude?.message ||
+						formState.errors.city?.message) && (
 						<p className="text-red-700">
-							{"Put a marker on the map to continue!"}
+							{"Select a valid city name to continue!"}
 						</p>
 					)}
 					<div>
@@ -204,14 +234,20 @@ const ListingCreator: NextPage = () => {
 							className="block my-2 text-sm font-medium text-gray-900 dark:text-gray-300"
 							htmlFor="output-location"
 						>
-							Output location
+							Output city
 						</label>
 						<input
 							className="date-input border border-[#BCBEC0] text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
 							id="output-location"
-							disabled
+							disabled={!enterCityManually}
 							required
 							title="Put a marker on the map!"
+							placeholder={
+								enterCityManually
+									? "City name not available, enter it manually or move the marker"
+									: "Put a marker on the map!"
+							}
+							{...register("city")}
 						/>
 					</div>
 				</div>
@@ -221,7 +257,7 @@ const ListingCreator: NextPage = () => {
 					<section className="overflow-hidden text-gray-700 ">
 						<div className="py-5 w-full">
 							<label className="block my-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-								Click on an image to select it as the main one
+								Select the main image
 							</label>
 							<div className="pt-3 grid md:grid-cols-2 gap-3 w-full">
 								{images.map((image, idx) => {

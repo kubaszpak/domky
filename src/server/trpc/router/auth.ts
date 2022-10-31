@@ -20,9 +20,7 @@ export const authRouter = t.router({
 		.mutation(async ({ ctx, input }) => {
 			const { date_start, date_end, ...data } = input;
 			if (date_start >= date_end) {
-				const msg =
-					"Date range invalid!\nThere must be at least 1 day between startDate and endDate!";
-				console.error(msg);
+				console.error("Date range invalid!");
 				return;
 			}
 			return await ctx.prisma.listing.create({

@@ -9,6 +9,7 @@ export const createSchema = z.object({
 	date_start: z.date(),
 	date_end: z.date(),
 	images: z.string().max(500),
+	city: z.string()
 });
 
 export const searchSchema = z.object({
