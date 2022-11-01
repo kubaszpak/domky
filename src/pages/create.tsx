@@ -17,9 +17,10 @@ import {
 } from "@/types/dates";
 import { DateRangeInput } from "@datepicker-react/styled";
 import useWindowSize from "@/components/utils/use_window_size";
+import { useRouter } from "next/router";
 
 const ListingCreator: NextPage = () => {
-	const { register, handleSubmit, reset, formState, setValue } = useZodForm({
+	const { register, handleSubmit, formState, setValue } = useZodForm({
 		schema: createSchema,
 		defaultValues: {
 			guests: 1,
@@ -30,7 +31,7 @@ const ListingCreator: NextPage = () => {
 	const [width] = useWindowSize();
 	const [state, dispatch] = useReducer(reducer, initialState);
 
-	const mutation = trpc.proxy.auth.createListing.useMutation();
+	const mutation = trpc.proxy.listing.createListing.useMutation();
 
 	const [marker, setMarker] = useState<google.maps.LatLng | null>(null);
 	const [zoom, setZoom] = useState(7); // initial zoom
@@ -42,6 +43,7 @@ const ListingCreator: NextPage = () => {
 	const [mainImage, setMainImage] = useState<string | null>(null);
 	const [images, setImages] = useState<string[]>([]);
 	const [enterCityManually, setEnterCityManually] = useState(false);
+	const router = useRouter();
 
 	const onClick = (e: google.maps.MapMouseEvent) => {
 		setMarker(e.latLng!);
@@ -111,11 +113,9 @@ const ListingCreator: NextPage = () => {
 	return (
 		<form
 			className="space-y-2 m-10 max-w-6xl xl:mx-auto"
-			onSubmit={handleSubmit(async (values) => {
-				await mutation.mutateAsync(values);
-				reset();
-				setMarker(null);
-				setImages([]);
+			onSubmit={handleSubmit((values) => {
+				mutation.mutate(values);
+				router.push("/");
 			})}
 		>
 			<div className="grid md:grid-flow-col grid-equal-col items-center">

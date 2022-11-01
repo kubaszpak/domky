@@ -14,8 +14,10 @@ import {
 	reducer,
 } from "@/types/dates";
 import useWindowSize from "@/components/utils/use_window_size";
+import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
+	const router = useRouter();
 	const [width] = useWindowSize();
 	const [libraries] = useState<Libraries>(["places"]);
 	const { isLoaded } = useLoadScript({
@@ -27,16 +29,16 @@ const Home: NextPage = () => {
 	const {
 		register,
 		handleSubmit,
-		reset,
 		setValue: setFormValue,
 		control,
+		formState,
 	} = useZodForm({
 		schema: searchSchema,
 		defaultValues: {
 			guests: 1,
 		},
 	});
-
+	
 	return (
 		<>
 			<Head>
@@ -45,9 +47,15 @@ const Home: NextPage = () => {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 			<form
-				onSubmit={handleSubmit(async () => {
-					console.log("Looking ...");
-					reset();
+				onSubmit={handleSubmit(async (data) => {
+					router.push({
+						pathname: "/find",
+						query: {
+							...data,
+							date_start: data.date_start.toUTCString(),
+							date_end: data.date_end.toUTCString(),
+						},
+					});
 				})}
 				className="flex flex-col lg:flex-row items-center lg:items-end justify-center gap-4 min-h-[80vh] lg:min-h-[40vh]"
 			>

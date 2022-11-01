@@ -5,7 +5,7 @@ import Image from "next/image";
 
 const Profile: NextPage = () => {
 	const { status } = useSession();
-	const listings = trpc.proxy.auth.listings.useQuery();
+	const listings = trpc.proxy.listing.me.useQuery();
 	// const reservations = trpc.proxy.reservations.me.useQuery();
 
 	if (status !== "authenticated") {

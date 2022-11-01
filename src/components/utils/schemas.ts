@@ -13,7 +13,7 @@ export const createSchema = z.object({
 });
 
 export const searchSchema = z.object({
-	where: z.string().max(2),
+	where: z.string(),
 	guests: z.number().positive().max(10),
 	date_start: z.date(),
 	date_end: z.date()
