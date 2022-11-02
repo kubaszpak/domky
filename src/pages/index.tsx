@@ -31,7 +31,6 @@ const Home: NextPage = () => {
 		handleSubmit,
 		setValue: setFormValue,
 		control,
-		formState,
 	} = useZodForm({
 		schema: searchSchema,
 		defaultValues: {
@@ -55,6 +54,7 @@ const Home: NextPage = () => {
 							date_start: data.date_start.toUTCString(),
 							date_end: data.date_end.toUTCString(),
 						},
+						href: "/find"
 					});
 				})}
 				className="flex flex-col lg:flex-row items-center lg:items-end justify-center gap-4 min-h-[80vh] lg:min-h-[40vh]"

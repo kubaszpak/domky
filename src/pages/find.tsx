@@ -4,14 +4,18 @@ import { useRouter } from "next/router";
 import React from "react";
 
 const Find = () => {
-	const router = useRouter();
-	const params = router.query;
+	const { query, isReady } = useRouter();
+
+	if (!isReady) return <></>;
+	const { where, guests, date_start, date_end } = query;
+
+	// if (!where || !guests || !date_start || !date_end) return
 
 	const parsedParams = searchSchema.parse({
-		...params,
-		guests: parseInt(params.guests!.toString()),
-		date_start: new Date(params.date_start!.toString()),
-		date_end: new Date(params.date_end!.toString()),
+		where,
+		guests: parseInt(guests!.toString()),
+		date_start: new Date(date_start!.toString()),
+		date_end: new Date(date_end!.toString()),
 	});
 
 	const searchQuery = trpc.proxy.listing.search.useQuery(parsedParams);
