@@ -14,11 +14,11 @@ const MyApp: AppType = ({
 }) => {
 	return (
 		<SessionProvider session={session}>
-			<ErrorBoundary>
-				<Layout>
+			<Layout>
+				<ErrorBoundary>
 					<Component {...pageProps} />
-				</Layout>
-			</ErrorBoundary>
+				</ErrorBoundary>
+			</Layout>
 		</SessionProvider>
 	);
 };
