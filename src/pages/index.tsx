@@ -46,18 +46,22 @@ const Home: NextPage = () => {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 			<div className="flex flex-auto flex-col justify-evenly items-center mb-10 md:mb-20">
-				<h1 className="font-black text-5xl sm:text-7xl text-center py-5">Find your new home</h1>
+				<h1 className="font-black text-5xl sm:text-7xl text-center py-5">
+					Find your new home
+				</h1>
 				<form
 					onSubmit={handleSubmit(async (data) => {
-						router.push({
-							pathname: "/find",
-							query: {
-								...data,
-								date_start: data.date_start.toUTCString(),
-								date_end: data.date_end.toUTCString(),
+						router.push(
+							{
+								pathname: "/find",
+								query: {
+									...data,
+									date_start: data.date_start.toUTCString(),
+									date_end: data.date_end.toUTCString(),
+								},
 							},
-							href: "/find",
-						});
+							"/find"
+						);
 					})}
 					className="flex flex-col lg:flex-row items-center justify-center gap-4"
 				>
@@ -113,7 +117,7 @@ const Home: NextPage = () => {
 						/>
 					</div>
 					<button
-						className="text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-1"
+						className="lg:self-end text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mb-1"
 						type="submit"
 					>
 						Find
