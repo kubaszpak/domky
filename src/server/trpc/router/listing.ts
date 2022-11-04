@@ -1,5 +1,6 @@
 import { createSchema, searchSchema } from "@/components/utils/schemas";
 import { createNextApiHandler } from "@trpc/server/adapters/next";
+import { z } from "zod";
 import { authedProcedure, t } from "../utils";
 
 export const listingRouter = t.router({
@@ -34,7 +35,8 @@ export const listingRouter = t.router({
 				},
 			});
 		}),
-	search: t.procedure.input(searchSchema).query(async ({ctx, input}) => {
+	search: t.procedure.input(z.optional(searchSchema)).query(async ({ctx, input}) => {
+		if (!input) return
 		return await ctx.prisma.listing.findMany({
 			where: {
 				city: input.where,
