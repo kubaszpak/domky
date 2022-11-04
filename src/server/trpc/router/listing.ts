@@ -35,32 +35,34 @@ export const listingRouter = t.router({
 				},
 			});
 		}),
-	search: t.procedure.input(z.optional(searchSchema)).query(async ({ctx, input}) => {
-		if (!input) return
-		return await ctx.prisma.listing.findMany({
-			where: {
-				city: input.where,
-				availability: {
-					start: {
-						lte: input.date_start
+	search: t.procedure
+		.input(searchSchema.nullable())
+		.query(async ({ ctx, input }) => {
+			if (!input) return;
+			return await ctx.prisma.listing.findMany({
+				where: {
+					city: input.where,
+					availability: {
+						start: {
+							lte: input.date_start,
+						},
+						end: {
+							gte: input.date_end,
+						},
 					},
-					end: {
-						gte: input.date_end
-					}
-				},
-				reservations: {
-					none: {
-						dateRange: {
-							start: {
-								gte: input.date_start
+					reservations: {
+						none: {
+							dateRange: {
+								start: {
+									gte: input.date_start,
+								},
+								end: {
+									lte: input.date_end,
+								},
 							},
-							end: {
-								lte: input.date_end
-							}
-						}
-					}
-				}
-			}
-		})
-	}),
+						},
+					},
+				},
+			});
+		}),
 });

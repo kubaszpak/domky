@@ -1,6 +1,5 @@
 import { searchSchema } from "@/components/utils/schemas";
 import { trpc } from "@/utils/trpc";
-import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { z } from "zod";
@@ -9,8 +8,8 @@ const Find = () => {
 	const { query, isReady } = useRouter();
 	const { where, guests, date_start, date_end } = query;
 	const [parsedParams, setParsedParams] = useState<
-		z.infer<typeof searchSchema> | undefined
-	>(undefined);
+		z.infer<typeof searchSchema> | null
+	>(null);
 
 	useEffect(() => {
 		if (!isReady) {
@@ -26,7 +25,9 @@ const Find = () => {
 		);
 	}, [isReady, where, date_start, date_end, guests]);
 
-	const searchQuery = trpc.proxy.listing.search.useQuery(parsedParams);
+	const searchQuery = trpc.proxy.listing.search.useQuery(parsedParams, {
+		enabled: !!parsedParams,
+	});
 
 	return (
 		<div>
