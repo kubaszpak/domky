@@ -53,13 +53,10 @@ const Home: NextPage = () => {
 					onSubmit={handleSubmit(async (data) => {
 						router.push(
 							{
-								pathname: `/find/${
-									data.where
-								}/${data.date_start.toUTCString()}/${data.date_end.toUTCString()}/${
-									data.guests
-								}`,
+								pathname: `/find/${data.where
+									}/${data.date_start.toUTCString()}/${data.date_end.toUTCString()}/${data.guests
+									}`,
 							}
-							// "/find"
 						);
 					})}
 					className="flex flex-col lg:flex-row items-center justify-center gap-4"

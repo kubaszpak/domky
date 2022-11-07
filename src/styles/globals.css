@@ -55,3 +55,8 @@ div#__next,
 div#__next > div {
 	min-height: 100vh;
 }
+
+.listing {
+	margin-inline: auto;
+	width: min(100% - 3rem, 800px);
+}

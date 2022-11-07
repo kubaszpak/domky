@@ -1,4 +1,5 @@
 import { createSchema, searchSchema } from "@/components/utils/schemas";
+import { z } from "zod";
 import { authedProcedure, t } from "../utils";
 
 export const listingRouter = t.router({
@@ -65,8 +66,16 @@ export const listingRouter = t.router({
 					},
 				},
 				include: {
-					availability: true
-				}
+					availability: true,
+				},
 			});
-		},),
+		}),
+	get: t.procedure.input(z.string().nullable()).query(async ({ input: id, ctx }) => {
+		if (!id) return;
+		return await ctx.prisma.listing.findUnique({
+			where: {
+				id: id,
+			},
+		});
+	}),
 });
