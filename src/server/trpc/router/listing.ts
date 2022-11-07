@@ -1,6 +1,4 @@
 import { createSchema, searchSchema } from "@/components/utils/schemas";
-import { createNextApiHandler } from "@trpc/server/adapters/next";
-import { z } from "zod";
 import { authedProcedure, t } from "../utils";
 
 export const listingRouter = t.router({
@@ -54,15 +52,21 @@ export const listingRouter = t.router({
 						none: {
 							dateRange: {
 								start: {
-									gte: input.date_start,
+									lt: input.date_end,
 								},
 								end: {
-									lte: input.date_end,
+									gt: input.date_start,
 								},
 							},
 						},
 					},
+					guests: {
+						gte: input.guests,
+					},
 				},
+				include: {
+					availability: true
+				}
 			});
-		}),
+		},),
 });

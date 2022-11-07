@@ -204,8 +204,8 @@ const ListingCreator: NextPage = () => {
 						<UploadWidget addImage={addImage} />
 					</div>
 					{formState.errors.images?.message && (
-						<p className="text-red-700">{formState.errors.guests?.message}</p>
-					)}
+						<p className="text-red-700">{formState.errors.images?.message} - Upload images to continue!</p>
+						)}
 				</div>
 				<div>
 					<label className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
@@ -264,7 +264,9 @@ const ListingCreator: NextPage = () => {
 									return (
 										<div
 											key={image}
-											className={`${mainImage === image && "selected-img"}`}
+											className={`${
+												mainImage === image && "selected-img"
+											} overflow-hidden rounded-lg`}
 										>
 											<Image
 												src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/${image}`}
