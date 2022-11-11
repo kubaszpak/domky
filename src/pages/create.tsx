@@ -58,12 +58,12 @@ const ListingCreator: NextPage = () => {
 
 	const createNewImageChain = useCallback(() => {
 		if (images.length === 0) return;
-		const imageChain =
-			`${mainImage ? mainImage : images[0]}` +
-			"@@@" +
-			images?.reduce((prev, curr) => {
-				return prev + "@@@" + curr;
-			}, "");
+		const main = `${mainImage ? mainImage : images[0]}`;
+		const imageChain = images?.reduce((prev, curr) => {
+			if (curr === main) return prev;
+			return prev + "@@@" + curr;
+		}, main);
+		console.log(imageChain);
 		setValue("images", imageChain);
 	}, [setValue, mainImage, images]);
 
@@ -204,8 +204,10 @@ const ListingCreator: NextPage = () => {
 						<UploadWidget addImage={addImage} />
 					</div>
 					{formState.errors.images?.message && (
-						<p className="text-red-700">{formState.errors.images?.message} - Upload images to continue!</p>
-						)}
+						<p className="text-red-700">
+							{formState.errors.images?.message} - Upload images to continue!
+						</p>
+					)}
 				</div>
 				<div>
 					<label className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">

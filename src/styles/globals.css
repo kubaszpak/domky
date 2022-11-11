@@ -56,7 +56,19 @@ div#__next > div {
 	min-height: 100vh;
 }
 
-.listing {
-	margin-inline: auto;
-	width: min(100% - 3rem, 800px);
+@media (min-width: 768px) {
+	.listing {
+		margin-inline: auto;
+		width: min(100% - 3rem, 1280px);
+	}
+}
+
+.results {
+	width: min(100% - 3rem, 1280px);
+}
+
+@media (min-width: 1280px) {
+	.results {
+		width: min(100% - 3rem, 1536px);
+	}
 }

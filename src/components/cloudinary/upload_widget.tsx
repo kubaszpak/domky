@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 
 interface UploadWidgetProps {
 	addImage: (image: string) => void;
 }
 
 const UploadWidget: React.FC<UploadWidgetProps> = ({ addImage }) => {
+	const [imageUploaded, setImageUploaded] = useState(false);
 	const widget = useMemo(
 		() =>
 			!!window.cloudinary &&
@@ -19,7 +20,9 @@ const UploadWidget: React.FC<UploadWidgetProps> = ({ addImage }) => {
 					maxImageWidth: 3000,
 					maxImageHeight: 2000,
 					cropping: true,
+					singleUploadAutoClose: false,
 					showSkipCropButton: false,
+					showUploadMoreButton: true,
 					croppingAspectRatio: 16 / 9,
 					clientAllowedFormats: ["png", "jpg", "jpeg"],
 					minImageWidth: 400,
@@ -28,6 +31,7 @@ const UploadWidget: React.FC<UploadWidgetProps> = ({ addImage }) => {
 				(error: any, result: any) => {
 					if (!error && result.event === "success") {
 						addImage(result.info.public_id);
+						setImageUploaded(true);
 					}
 				}
 			),
@@ -46,7 +50,7 @@ const UploadWidget: React.FC<UploadWidgetProps> = ({ addImage }) => {
 					className="text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-1"
 					onClick={showWidget}
 				>
-					Upload images
+					{imageUploaded ? "Upload next image" : "Upload an image"}
 				</button>
 			</div>
 		</>

@@ -52,7 +52,7 @@ const Find = () => {
 		enabled: !!parsedParams,
 	});
 	return (
-		<div className="p-5 max-w-screen-2xl mx-auto lg:max-w-7xl">
+		<div className="p-5 mx-auto results">
 			<h1 className="font-bold mb-5 text-lg">Results</h1>
 			<div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
 				{searchQuery.isSuccess &&
