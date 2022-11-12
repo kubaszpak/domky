@@ -76,6 +76,9 @@ export const listingRouter = t.router({
 			where: {
 				id: id,
 			},
+			include: {
+				availability: true
+			}
 		});
 	}),
 });

@@ -56,10 +56,20 @@ div#__next > div {
 	min-height: 100vh;
 }
 
+.listing {
+	margin-inline: auto;
+	width: calc(100% - 3rem)
+}
+
 @media (min-width: 768px) {
 	.listing {
-		margin-inline: auto;
-		width: min(100% - 3rem, 1280px);
+		width: min(100% - 6rem, 1024px);
+	}
+}
+
+@media (min-width: 1024px) {
+	.listing {
+		width: min(100% - 9rem, 1024px);
 	}
 }
 

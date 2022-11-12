@@ -213,7 +213,10 @@ const ListingCreator: NextPage = () => {
 					<label className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
 						Mark a location
 					</label>
-					<Wrapper apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
+					<Wrapper
+						id="google-map-script"
+						apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
+					>
 						<Map
 							center={center}
 							onClick={onClick}

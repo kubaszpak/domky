@@ -6,25 +6,8 @@ import React, { useEffect, useState } from "react";
 import { z } from "zod";
 import { BsFillPeopleFill } from "react-icons/bs";
 import Link from "next/link";
-
-interface Dates {
-	[key: number]: string;
-}
-
-const dates: Dates = {
-	0: "Jan",
-	1: "Feb",
-	2: "Mar",
-	3: "Apr",
-	4: "May",
-	5: "Jun",
-	6: "Jul",
-	7: "Aug",
-	8: "Sep",
-	9: "Oct",
-	10: "Nov",
-	11: "Dec",
-};
+import { Spinner } from "flowbite-react";
+import { dates } from "@/types/dates";
 
 const Find = () => {
 	const today = new Date();
@@ -51,55 +34,69 @@ const Find = () => {
 	const searchQuery = trpc.proxy.listing.search.useQuery(parsedParams, {
 		enabled: !!parsedParams,
 	});
+
+	if (searchQuery.isFetching)
+		return (
+			<div className="h-full flex flex-auto justify-center items-center">
+				<Spinner aria-label="Loading" size="xl" />
+			</div>
+		);
+
 	return (
 		<div className="p-5 mx-auto results">
-			<h1 className="font-bold mb-5 text-lg">Results</h1>
-			<div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-				{searchQuery.isSuccess &&
-					searchQuery.data &&
-					searchQuery.data.map((listing) => {
-						const start =
-							today > listing.availability?.start!
-								? today
-								: listing.availability?.start!;
-						const end = listing.availability?.end;
+			{searchQuery.isSuccess && searchQuery.data?.length ? (
+				<>
+					<h1 className="font-bold mb-5 text-lg">Results</h1>
+					<div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+						{searchQuery.data.map((listing) => {
+							const start =
+								today > listing.availability?.start!
+									? today
+									: listing.availability?.start!;
+							const end = listing.availability?.end;
 
-						if (today > end!) return;
+							if (today > end!) return;
 
-						return (
-							<Link
-								href={`/listing/${listing.id}`}
-								key={listing.id}
-								legacyBehavior
-							>
-								<a>
-									<div className="overflow-hidden rounded-lg">
-										<Image
-											src={`https://res.cloudinary.com/${
-												process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
-											}/image/upload/${listing.images.split("@@@")[0]}`}
-											alt={`Apartment main image`}
-											width={1120}
-											height={630}
-										/>
-									</div>
-									<div className="float-right text-right">
-										<h1 className="font-semibold">{listing.name}</h1>
-										<h2>
-											{listing.city}
-											<BsFillPeopleFill className="inline mx-1 p-0.5" />
-											{listing.guests}
-										</h2>
-										<h2>
-											{`${start!.getDate()} ${dates[start!.getMonth()]} -
+							return (
+								<Link
+									href={`/listing/${listing.id}/${date_start}/${date_end}`}
+									key={listing.id}
+									legacyBehavior
+								>
+									<a>
+										<div className="overflow-hidden rounded-lg">
+											<Image
+												src={`https://res.cloudinary.com/${
+													process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+												}/image/upload/${listing.images.split("@@@")[0]}`}
+												alt={`Apartment main image`}
+												width={1120}
+												height={630}
+											/>
+										</div>
+										<div className="float-right text-right">
+											<h1 className="font-semibold">{listing.name}</h1>
+											<h2>
+												{listing.city}
+												<BsFillPeopleFill className="inline mx-1 p-0.5" />
+												{listing.guests}
+											</h2>
+											<h2>
+												{`${start!.getDate()} ${dates[start!.getMonth()]} -
 										${end!.getDate()} ${dates[end!.getMonth()]}`}
-										</h2>
-									</div>
-								</a>
-							</Link>
-						);
-					})}
-			</div>
+											</h2>
+										</div>
+									</a>
+								</Link>
+							);
+						})}
+					</div>
+				</>
+			) : (
+				<div className="h-full w-full mx-auto flex flex-auto justify-center items-center">
+					Results not found
+				</div>
+			)}
 		</div>
 	);
 };
