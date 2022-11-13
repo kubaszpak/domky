@@ -63,7 +63,6 @@ const ListingCreator: NextPage = () => {
 			if (curr === main) return prev;
 			return prev + "@@@" + curr;
 		}, main);
-		console.log(imageChain);
 		setValue("images", imageChain);
 	}, [setValue, mainImage, images]);
 

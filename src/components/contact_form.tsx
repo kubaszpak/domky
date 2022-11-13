@@ -71,7 +71,7 @@ function ContactForm({
 								width={160}
 							/>
 							<div className="my-5">
-								Reservation:{" "}
+								Dates:{" "}
 								{`${date_start!.getDate()} ${
 									dates[date_start!.getMonth()]
 								} - ${date_end!.getDate()} ${dates[date_end!.getMonth()]}`}
@@ -87,7 +87,7 @@ function ContactForm({
 									value={message}
 									onChange={(e) => setMessage(e.target.value)}
 									id="message"
-									className="border border-[#BCBEC0] text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+									className="border border-[#BCBEC0] text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 min-h-[8rem] sm:min-h-[5rem]"
 									placeholder="Enter a message"
 									required
 								/>

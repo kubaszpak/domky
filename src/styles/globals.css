@@ -82,3 +82,7 @@ div#__next > div {
 		width: min(100% - 3rem, 1536px);
 	}
 }
+
+.h-modal {
+	height: 100% !important;
+}
