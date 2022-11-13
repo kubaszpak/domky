@@ -67,10 +67,10 @@ function Listing() {
 							images.map((imageId, idx) => {
 								const link = `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/${imageId}`;
 								return (
-									<div key={idx} className="h-full w-full">
+									<div key={idx} className="relative h-full w-full">
 										<a href={link}>
 											<Image
-												priority
+												priority={true}
 												src={link}
 												alt={`Apartment image ${idx}`}
 												layout="fill"
