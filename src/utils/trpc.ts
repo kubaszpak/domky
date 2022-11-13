@@ -1,11 +1,8 @@
 // src/utils/trpc.ts
-import { zodResolver } from "@hookform/resolvers/zod";
 import { setupTRPC } from "@trpc/next";
 import type { inferProcedureInput, inferProcedureOutput } from "@trpc/server";
 import type { AppRouter } from "../server/trpc/router";
 import superjson from "superjson";
-import { useForm, UseFormProps } from "react-hook-form";
-import { z } from "zod";
 
 const getBaseUrl = () => {
 	if (typeof window !== "undefined") return ""; // browser should use relative url

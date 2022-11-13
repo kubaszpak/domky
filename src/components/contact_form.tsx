@@ -4,14 +4,14 @@ import { DateRange, Listing } from "@prisma/client";
 import {
 	addDoc,
 	collection,
-	doc,
 	DocumentData,
-	getDoc,
 	getDocs,
 	query,
 	QuerySnapshot,
-	setDoc,
 	where,
+	serverTimestamp,
+	Timestamp,
+	updateDoc,
 } from "firebase/firestore";
 import { Modal } from "flowbite-react";
 import { signIn, useSession } from "next-auth/react";
@@ -33,15 +33,14 @@ function ContactForm({
 	date_start,
 	date_end,
 }: ContactFormProps) {
-	const [message, setMessage] = useState(
-		`Hi! I'd like to book the apartment ${
-			listing.name
-		} for a period of time starting from ${date_start!.getDate()} ${
-			dates[date_start!.getMonth()]
-		} and lasting until ${date_end!.getDate()} ${
-			dates[date_end!.getMonth()]
-		}. Looking forward to hearing from you. Thanks!`
-	);
+	const defaultMessage = `Hi! I'd like to book the apartment ${
+		listing.name
+	} for a period of time starting from ${date_start!.getDate()} ${
+		dates[date_start!.getMonth()]
+	} and lasting until ${date_end!.getDate()} ${
+		dates[date_end!.getMonth()]
+	}. Looking forward to hearing from you. Thanks!`;
+	const [message, setMessage] = useState(defaultMessage);
 	const { data: session, status } = useSession();
 
 	const getChatWithRecepient = (
@@ -105,13 +104,24 @@ function ContactForm({
 									const chatRef = !chat
 										? await addDoc(chatsRef, {
 												users: [session.user?.id, listing.userId],
+												timestamp: serverTimestamp(),
 										  })
-										: chat.ref;
+										: (await updateDoc(chat.ref, {
+												timestamp: serverTimestamp(),
+										  }),
+										  chat.ref);
 									addDoc(collection(chatRef, "messages"), {
 										message: message,
 										sender: session.user?.id,
+										timestamp: serverTimestamp(),
+										reservation: {
+											userId: session.user?.id,
+											listingId: listing.id,
+											date_start: Timestamp.fromDate(date_start!),
+											date_end: Timestamp.fromDate(date_end!),
+										},
 									});
-									setMessage("");
+									setMessage(defaultMessage);
 									setShowModal(false);
 								}}
 							>

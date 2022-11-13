@@ -1,6 +1,7 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
+import { BiMessageDetail } from "react-icons/bi";
 
 export default function Navbar() {
 	const { status } = useSession();
@@ -28,6 +29,11 @@ export default function Navbar() {
 							<a>
 								<b>Create</b>
 							</a>
+						</Link>
+						<Link href={"/chat"}>
+							<div className="cursor-pointer">
+								<BiMessageDetail />
+							</div>
 						</Link>
 						<button onClick={() => signOut()}>Sign out</button>
 					</>
