@@ -4,11 +4,33 @@ import { Spinner } from "flowbite-react";
 import { GetServerSideProps } from "next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
 import { signIn, useSession } from "next-auth/react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { authOptions } from "./api/auth/[...nextauth]";
+import { io, Socket } from "socket.io-client";
+import { DefaultEventsMap } from "@socket.io/component-emitter";
+
+let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
+
+const socketInitializer = async (userId: string) => {
+	// We just call it because we don't need anything else out of it
+	await fetch("/api/socket");
+
+	socket = io();
+
+	socket.on("newIncomingMessage", (msg) => {
+		console.log(msg);
+	});
+	socket.emit("join", { userId: userId });
+};
 
 const Chat = ({ messages }: { messages: string }) => {
 	const { data: session, status } = useSession();
+	const [id, setId] = useState("");
+
+	useEffect(() => {
+		if (!session || status !== "authenticated") return;
+		socketInitializer(session.user!.id);
+	}, [status, session]);
 
 	if (status === "loading") {
 		return (
@@ -33,11 +55,32 @@ const Chat = ({ messages }: { messages: string }) => {
 	}
 
 	return (
-		<div>
-			{JSON.parse(messages).map((message: any, idx: number) => {
-				return <div key={idx}>{JSON.stringify(message)}</div>;
-			})}
-		</div>
+		<>
+			<div>
+				{JSON.parse(messages).map((message: any, idx: number) => {
+					return <div key={idx}>{JSON.stringify(message)}</div>;
+				})}
+			</div>
+			<input
+				type="text"
+				id="id"
+				name="id"
+				placeholder="id"
+				value={id}
+				onChange={(e) => setId(e.target.value)}
+			/>
+			<button
+				onClick={() => {
+					console.log({ msg: "Hi from client!", userId: id });
+					socket.emit("private-message", {
+						msg: "Hi from client!",
+						userId: id,
+					});
+				}}
+			>
+				Send
+			</button>
+		</>
 	);
 };
 

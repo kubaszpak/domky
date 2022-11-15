@@ -10,7 +10,7 @@ export const createContext = async (
 	opts: trpcNext.CreateNextContextOptions
 ) => {
 	const session = await getServerSession(opts.req, opts.res, nextAuthOptions);
-
+	
 	return {
 		session,
 		prisma,
