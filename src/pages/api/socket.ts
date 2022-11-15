@@ -4,6 +4,8 @@ import { Server } from "socket.io";
 import { unstable_getServerSession as getServerSession } from "next-auth";
 import { authOptions as nextAuthOptions } from "./auth/[...nextauth]";
 
+const socketMap = {};
+
 export default async function SocketHandler(
 	req: NextApiRequest,
 	res: NextApiResponseWithSocket
@@ -16,7 +18,6 @@ export default async function SocketHandler(
 		return;
 	}
 
-	// It means that socket server was already initialised
 	if (res.socket.server.io) {
 		console.log("Already set up");
 		res.end();
@@ -26,23 +27,23 @@ export default async function SocketHandler(
 	const io = new Server(res.socket.server);
 	res.socket.server.io = io;
 
-	// Define actions inside
-	io.on("connection", (socket) => {
-		socket.on("join", async ({ userId }) => {
-			console.log(`Looking for user ${userId} with socket.id ${socket.id}`);
-			const clientSocket = await io.in(socket.id).fetchSockets();
-			console.log(`Found ${clientSocket.length} sockets`);
-			clientSocket[0]?.join(userId);
-			// clientSocket.join(userId);
-
-			// console.log(`User of id ${session.user!.id} joining room ${room}`);
-		});
-		socket.on("private-message", ({ msg, userId }) => {
-			socket.to(userId).emit("newIncomingMessage", msg);
-		});
-		socket.broadcast.emit("newIncomingMessage", { msg: "Hello World" });
+	io.use((socket, next) => {
+		const userId = socket.handshake.auth.userId;
+		if (!userId || userId !== session?.user?.id) {
+			return next(new Error("Invalid userId"));
+		}
+		(socket as any).userId = userId;
+		next();
 	});
 
-	console.log("Setting up socket");
+	// Define actions inside
+	io.on("connection", (socket) => {
+		socket.join((socket as any).userId);
+		socket.on("private-message", ({ msg, userId }) => {
+			socket.to(userId).emit("new-message", msg);
+		});
+	});
+
+	console.log("Setting up socket finished");
 	res.end();
 }

@@ -11,21 +11,20 @@ import { DefaultEventsMap } from "@socket.io/component-emitter";
 
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 
-const socketInitializer = async (userId: string) => {
-	// We just call it because we don't need anything else out of it
-	await fetch("/api/socket");
-
-	socket = io();
-
-	socket.on("newIncomingMessage", (msg) => {
-		console.log(msg);
-	});
-	socket.emit("join", { userId: userId });
-};
-
 const Chat = ({ messages }: { messages: string }) => {
 	const { data: session, status } = useSession();
 	const [id, setId] = useState("");
+
+	const socketInitializer = async (userId: string) => {
+		await fetch("/api/socket");
+
+		socket = io({ autoConnect: false });
+		socket.auth = { userId };
+		socket.connect();
+		socket.onAny((event, ...args) => {
+			console.log(event, args);
+		});
+	};
 
 	useEffect(() => {
 		if (!session || status !== "authenticated") return;
@@ -71,7 +70,6 @@ const Chat = ({ messages }: { messages: string }) => {
 			/>
 			<button
 				onClick={() => {
-					console.log({ msg: "Hi from client!", userId: id });
 					socket.emit("private-message", {
 						msg: "Hi from client!",
 						userId: id,
