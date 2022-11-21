@@ -72,7 +72,7 @@ export const listingRouter = t.router({
 		}),
 	get: t.procedure.input(z.string().nullable()).query(async ({ input: id, ctx }) => {
 		if (!id) return;
-		return await ctx.prisma.listing.findUnique({
+		return await ctx.prisma.listing.findFirst({
 			where: {
 				id: id,
 			},

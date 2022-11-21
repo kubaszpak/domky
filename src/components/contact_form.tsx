@@ -1,18 +1,6 @@
 import { dates } from "@/types/dates";
-import firestore from "@/utils/firebase";
+import { trpc } from "@/utils/trpc";
 import { DateRange, Listing } from "@prisma/client";
-import {
-	addDoc,
-	collection,
-	DocumentData,
-	getDocs,
-	query,
-	QuerySnapshot,
-	where,
-	serverTimestamp,
-	Timestamp,
-	updateDoc,
-} from "firebase/firestore";
 import { Modal } from "flowbite-react";
 import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
@@ -22,8 +10,8 @@ interface ContactFormProps {
 	showModal: boolean;
 	setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
 	listing: Listing & { availability: DateRange | null };
-	date_start: Date | undefined;
-	date_end: Date | undefined;
+	date_start: Date;
+	date_end: Date;
 }
 
 function ContactForm({
@@ -42,15 +30,8 @@ function ContactForm({
 	}. Looking forward to hearing from you. Thanks!`;
 	const [message, setMessage] = useState(defaultMessage);
 	const { data: session, status } = useSession();
-
-	const getChatWithRecepient = (
-		chats: QuerySnapshot<DocumentData>,
-		recepientId: string
-	) => {
-		return !chats.empty
-			? chats.docs.find((doc) => doc.data().users.includes(recepientId))
-			: undefined;
-	};
+	const sendMutation = trpc.proxy.message.contact.useMutation();
+	console.log(sendMutation)
 
 	return (
 		<div>
@@ -71,9 +52,9 @@ function ContactForm({
 							/>
 							<div className="my-5">
 								Dates:{" "}
-								{`${date_start!.getDate()} ${
-									dates[date_start!.getMonth()]
-								} - ${date_end!.getDate()} ${dates[date_end!.getMonth()]}`}
+								{`${date_start.getDate()} ${
+									dates[date_start.getMonth()]
+								} - ${date_end.getDate()} ${dates[date_end.getMonth()]}`}
 							</div>
 							<div>
 								<label
@@ -94,32 +75,13 @@ function ContactForm({
 							<button
 								className="text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-semibold rounded-lg text-sm px-5 py-2.5 text-center mt-5"
 								onClick={async () => {
-									const chatsRef = collection(firestore, "chats");
-									const q = query(
-										chatsRef,
-										where("users", "array-contains", session.user?.id)
-									);
-									const userChats = await getDocs(q);
-									const chat = getChatWithRecepient(userChats, listing.userId);
-									const chatRef = !chat
-										? await addDoc(chatsRef, {
-												users: [session.user?.id, listing.userId],
-												timestamp: serverTimestamp(),
-										  })
-										: (await updateDoc(chat.ref, {
-												timestamp: serverTimestamp(),
-										  }),
-										  chat.ref);
-									addDoc(collection(chatRef, "messages"), {
-										message: message,
-										sender: session.user?.id,
-										timestamp: serverTimestamp(),
-										reservation: {
-											userId: session.user?.id,
-											listingId: listing.id,
-											date_start: Timestamp.fromDate(date_start!),
-											date_end: Timestamp.fromDate(date_end!),
-										},
+									if (listing.userId === session.user?.id) return
+									sendMutation.mutate({
+										content: message,
+										date_start: date_start,
+										date_end: date_end,
+										listingOwnerId: listing.userId,
+										listingId: listing.id,
 									});
 									setMessage(defaultMessage);
 									setShowModal(false);

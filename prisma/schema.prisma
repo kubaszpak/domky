@@ -48,15 +48,17 @@ model Session {
 }
 
 model User {
-    id            String        @id @default(cuid())
+    id            String         @id @default(cuid())
     name          String?
-    email         String?       @unique
+    email         String?        @unique
     emailVerified DateTime?
     image         String?
     accounts      Account[]
     sessions      Session[]
     listings      Listing[]
     reservations  Reservation[]
+    sentMessages  Message[]
+    chats         UsersOnChats[]
 }
 
 model VerificationToken {
@@ -81,6 +83,7 @@ model DateRange {
 
 model Listing {
     id           String        @id @default(cuid())
+    status       ListingStatus @default(ACTIVE)
     name         String
     user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
     userId       String
@@ -96,14 +99,58 @@ model Listing {
     @@index([userId])
 }
 
-model Reservation {
-    id          String    @id @default(cuid())
-    dateRange   DateRange @relation(fields: [dateRangeId], references: [id])
-    dateRangeId String    @unique
-    listingId   String
-    listing     Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
-    userId      String
-    user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+enum ListingStatus {
+    ACTIVE
+    SUSPENDED
+}
 
-    @@index([dateRangeId, userId, listingId])
+model Reservation {
+    id          String            @id @default(cuid())
+    status      ReservationStatus @default(PENDING)
+    dateRange   DateRange         @relation(fields: [dateRangeId], references: [id])
+    dateRangeId String            @unique
+    listingId   String
+    listing     Listing           @relation(fields: [listingId], references: [id], onDelete: Cascade)
+    userId      String
+    user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+    messages    Message[]
+
+    @@index([dateRangeId])
+    @@index([userId, listingId])
+}
+
+enum ReservationStatus {
+    CONFIRMED
+    DECLINED
+    PENDING
+}
+
+model Chat {
+    id        String         @id @default(cuid())
+    users     UsersOnChats[]
+    messages  Message[]
+    updatedAt DateTime       @updatedAt
+}
+
+model UsersOnChats {
+    chatId String
+    chat   Chat   @relation(fields: [chatId], references: [id])
+    userId String
+    user   User   @relation(fields: [userId], references: [id])
+
+    @@id([userId, chatId])
+}
+
+model Message {
+    id            String       @id @default(cuid())
+    senderId      String
+    sender        User         @relation(fields: [senderId], references: [id])
+    content       String
+    reservationId String?
+    reservation   Reservation? @relation(fields: [reservationId], references: [id])
+    chatId        String
+    chat          Chat         @relation(fields: [chatId], references: [id])
+    createdAt     DateTime     @default(now())
+
+    @@index([chatId])
 }

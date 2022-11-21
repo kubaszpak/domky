@@ -41,7 +41,7 @@ function Listing() {
 
 	const getQuery = trpc.proxy.listing.get.useQuery(parsedParams?.id || null);
 
-	if (!getQuery.isSuccess || !getQuery.data)
+	if (!getQuery.isSuccess || !getQuery.data || !parsedParams)
 		return (
 			<div className="h-full w-full flex flex-auto justify-center items-center">
 				<Spinner aria-label="Loading" size="xl" />
@@ -122,8 +122,8 @@ function Listing() {
 					showModal={showModal}
 					setShowModal={setShowModal}
 					listing={data}
-					date_start={parsedParams?.date_start}
-					date_end={parsedParams?.date_end}
+					date_start={parsedParams.date_start}
+					date_end={parsedParams.date_end}
 				/>
 			</div>
 		</div>

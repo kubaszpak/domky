@@ -1,5 +1,3 @@
-import firestore from "@/utils/firebase";
-import { collection, getDocs, query, where } from "firebase/firestore";
 import { Spinner } from "flowbite-react";
 import { GetServerSideProps } from "next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
@@ -8,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { io, Socket } from "socket.io-client";
 import { DefaultEventsMap } from "@socket.io/component-emitter";
+import { prisma } from "@/server/db/client";
 
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 
@@ -56,9 +55,6 @@ const Chat = ({ messages }: { messages: string }) => {
 	return (
 		<>
 			<div>
-				{JSON.parse(messages).map((message: any, idx: number) => {
-					return <div key={idx}>{JSON.stringify(message)}</div>;
-				})}
 			</div>
 			<input
 				type="text"
@@ -82,12 +78,6 @@ const Chat = ({ messages }: { messages: string }) => {
 	);
 };
 
-const getUserChats = async (userId: string) => {
-	const chatsRef = collection(firestore, "chats");
-	const q = query(chatsRef, where("users", "array-contains", userId));
-	return await getDocs(q);
-};
-
 export const getServerSideProps: GetServerSideProps = async (context) => {
 	const session = await getServerSession(context.req, context.res, authOptions);
 
@@ -99,25 +89,18 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 			},
 		};
 	}
-	const userChats = await getUserChats(session.user!.id);
 
-	if (!userChats || userChats.empty)
-		return {
-			props: {},
-		};
-
-	const userChatsData = userChats.docs.map(async (doc) => {
-		const docsRef = await getDocs(collection(doc.ref, "messages"));
-		const docs = docsRef.docs.map((doc) => doc.data());
-		return {
-			...doc.data(),
-			messages: docs,
-		};
-	});
+	const chats = prisma.chat.findMany({
+		where: {
+			users: {
+				
+			}
+		}
+	})
 
 	return {
 		props: {
-			messages: JSON.stringify(await Promise.all(userChatsData)),
+			messages: "",
 		},
 	};
 };

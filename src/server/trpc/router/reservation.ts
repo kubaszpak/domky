@@ -1,6 +1,6 @@
 import { t, authedProcedure } from "../utils";
 
-export const reservationsRouter = t.router({
+export const reservationRouter = t.router({
 	me: authedProcedure.query(async ({ ctx }) => {
 		return await ctx.prisma.reservation.findMany({
 			where: {

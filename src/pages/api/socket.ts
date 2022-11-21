@@ -4,8 +4,6 @@ import { Server } from "socket.io";
 import { unstable_getServerSession as getServerSession } from "next-auth";
 import { authOptions as nextAuthOptions } from "./auth/[...nextauth]";
 
-const socketMap = {};
-
 export default async function SocketHandler(
 	req: NextApiRequest,
 	res: NextApiResponseWithSocket
@@ -29,6 +27,7 @@ export default async function SocketHandler(
 
 	io.use((socket, next) => {
 		const userId = socket.handshake.auth.userId;
+		console.log("Middleware hit " + userId + " socket.id " + socket.id);
 		if (!userId || userId !== session?.user?.id) {
 			return next(new Error("Invalid userId"));
 		}
@@ -36,7 +35,6 @@ export default async function SocketHandler(
 		next();
 	});
 
-	// Define actions inside
 	io.on("connection", (socket) => {
 		socket.join((socket as any).userId);
 		socket.on("private-message", ({ msg, userId }) => {
