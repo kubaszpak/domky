@@ -1,5 +1,5 @@
 import { Spinner } from "flowbite-react";
-import { GetServerSideProps } from "next";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
 import { signIn, useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
@@ -7,10 +7,10 @@ import { authOptions } from "./api/auth/[...nextauth]";
 import { io, Socket } from "socket.io-client";
 import { DefaultEventsMap } from "@socket.io/component-emitter";
 import { prisma } from "@/server/db/client";
+import { Chat, Message, User, UsersOnChats } from "@prisma/client";
 
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
-
-const Chat = ({ messages }: { messages: string }) => {
+const Chat = ({ chats }: { chats: string }) => {
 	const { data: session, status } = useSession();
 	const [id, setId] = useState("");
 
@@ -53,8 +53,19 @@ const Chat = ({ messages }: { messages: string }) => {
 	}
 
 	return (
-		<>
+		<div>
 			<div>
+				{chats &&
+					JSON.parse(chats).map(
+						(
+							chat: Chat & {
+								users: (UsersOnChats & {
+									user: User;
+								})[];
+								messages: Message[];
+							}
+						) => <h1 key={chat.id}>{JSON.stringify(chat)}</h1>
+					)}
 			</div>
 			<input
 				type="text"
@@ -66,22 +77,22 @@ const Chat = ({ messages }: { messages: string }) => {
 			/>
 			<button
 				onClick={() => {
-					socket.emit("private-message", {
-						msg: "Hi from client!",
-						userId: id,
-					});
+					// socket.emit("private-message", {
+					// 	msg: "Hi from client!",
+					// 	userId: id,
+					// });
 				}}
 			>
 				Send
 			</button>
-		</>
+		</div>
 	);
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
 	const session = await getServerSession(context.req, context.res, authOptions);
 
-	if (!session) {
+	if (!session || !session.user) {
 		return {
 			redirect: {
 				destination: "/",
@@ -90,17 +101,37 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 		};
 	}
 
-	const chats = prisma.chat.findMany({
+	const chats = await prisma.chat.findMany({
 		where: {
 			users: {
-				
-			}
-		}
-	})
+				some: {
+					userId: session.user.id,
+				},
+			},
+		},
+		include: {
+			messages: true,
+			users: {
+				include: {
+					user: true,
+				},
+			},
+		},
+		orderBy: {
+			updatedAt: "desc",
+		},
+	});
+
+	const chatsWithSortedMessages = chats.map((chat) => ({
+		...chat,
+		mesages: chat.messages.sort(
+			(a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+		),
+	}));
 
 	return {
 		props: {
-			messages: "",
+			chats: JSON.stringify(chatsWithSortedMessages),
 		},
 	};
 };
