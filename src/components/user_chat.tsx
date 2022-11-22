@@ -7,7 +7,7 @@ interface UserChatProps {
 
 const UserChat: React.FC<UserChatProps> = ({ chats }) => {
 	console.log(JSON.parse(chats));
-	// TODO: Setup image scaling https://css-tricks.com/snippets/css/truncate-string-with-ellipsis/
+	// TODO: Setup text truncate https://css-tricks.com/snippets/css/truncate-string-with-ellipsis/
 	return (
 		<div className="container mx-auto">
 			<div className="min-w-full border rounded lg:grid lg:grid-cols-3">
