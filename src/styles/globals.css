@@ -58,7 +58,7 @@ div#__next > div {
 
 .listing {
 	margin-inline: auto;
-	width: calc(100% - 3rem)
+	width: calc(100% - 3rem);
 }
 
 @media (min-width: 768px) {
@@ -85,4 +85,8 @@ div#__next > div {
 
 .h-modal {
 	height: 100% !important;
+}
+
+.chat-height {
+	height: calc(100vh - 10rem);
 }

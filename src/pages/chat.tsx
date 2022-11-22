@@ -1,5 +1,5 @@
 import { Spinner } from "flowbite-react";
-import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { GetServerSideProps, NextPage } from "next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
 import { signIn, useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
@@ -7,10 +7,10 @@ import { authOptions } from "./api/auth/[...nextauth]";
 import { io, Socket } from "socket.io-client";
 import { DefaultEventsMap } from "@socket.io/component-emitter";
 import { prisma } from "@/server/db/client";
-import { Chat, Message, User, UsersOnChats } from "@prisma/client";
+import UserChat from "@/components/user_chat";
 
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
-const Chat = ({ chats }: { chats: string }) => {
+const Chat: NextPage<{ chats: string }> = ({ chats }) => {
 	const { data: session, status } = useSession();
 	const [id, setId] = useState("");
 
@@ -26,8 +26,9 @@ const Chat = ({ chats }: { chats: string }) => {
 	};
 
 	useEffect(() => {
-		if (!session || status !== "authenticated") return;
+		if (status !== "authenticated") return;
 		socketInitializer(session.user!.id);
+		() => socket.offAny();
 	}, [status, session]);
 
 	if (status === "loading") {
@@ -53,21 +54,9 @@ const Chat = ({ chats }: { chats: string }) => {
 	}
 
 	return (
-		<div>
-			<div>
-				{chats &&
-					JSON.parse(chats).map(
-						(
-							chat: Chat & {
-								users: (UsersOnChats & {
-									user: User;
-								})[];
-								messages: Message[];
-							}
-						) => <h1 key={chat.id}>{JSON.stringify(chat)}</h1>
-					)}
-			</div>
-			<input
+		<div className="flex-auto flex items-center">
+			{chats && <UserChat chats={chats} />}
+			{/* <input
 				type="text"
 				id="id"
 				name="id"
@@ -84,7 +73,7 @@ const Chat = ({ chats }: { chats: string }) => {
 				}}
 			>
 				Send
-			</button>
+			</button> */}
 		</div>
 	);
 };
@@ -124,9 +113,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 	const chatsWithSortedMessages = chats.map((chat) => ({
 		...chat,
-		mesages: chat.messages.sort(
+		messages: chat.messages.sort(
 			(a, b) => b.createdAt.getTime() - a.createdAt.getTime()
 		),
+		users: chat.users.filter((user) => user.userId !== session.user!.id)[0]
 	}));
 
 	return {
