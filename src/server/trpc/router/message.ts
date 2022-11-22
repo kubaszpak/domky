@@ -1,3 +1,4 @@
+import { PrismaClient, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { t, authedProcedure } from "../utils";
 
@@ -8,6 +9,46 @@ const sendSchema = z.object({
 	listingId: z.string(),
 	listingOwnerId: z.string(),
 });
+
+export async function fetchUsers(
+	prisma: PrismaClient<
+		Prisma.PrismaClientOptions,
+		never,
+		Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined
+	>,
+	id: string
+) {
+	const chats = await prisma.chat.findMany({
+		where: {
+			users: {
+				some: {
+					userId: id,
+				},
+			},
+		},
+		include: {
+			messages: true,
+			users: {
+				include: {
+					user: true,
+				},
+			},
+		},
+		orderBy: {
+			updatedAt: "desc",
+		},
+	});
+
+	const chatsWithSortedMessages = chats.map((chat) => ({
+		...chat,
+		messages: chat.messages.sort(
+			(a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+		),
+		users: chat.users.filter((user) => user.userId !== id)[0],
+	}));
+
+	return chatsWithSortedMessages;
+}
 
 export const messageRouter = t.router({
 	contact: authedProcedure
@@ -50,4 +91,7 @@ export const messageRouter = t.router({
 				},
 			});
 		}),
+	me: authedProcedure.query(async ({ ctx }) => {
+		return await fetchUsers(ctx.prisma, ctx.session.user.id);
+	}),
 });

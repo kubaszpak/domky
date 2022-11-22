@@ -7,12 +7,27 @@ import { authOptions } from "./api/auth/[...nextauth]";
 import { io, Socket } from "socket.io-client";
 import { DefaultEventsMap } from "@socket.io/component-emitter";
 import { prisma } from "@/server/db/client";
-import UserChat from "@/components/user_chat";
+import UserChat from "@/components/chat/user_chat";
+import { fetchUsers } from "@/server/trpc/router/message";
+import ChatsList from "@/components/chat/chats_list";
+import { trpc } from "@/utils/trpc";
 
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 const Chat: NextPage<{ chats: string }> = ({ chats }) => {
 	const { data: session, status } = useSession();
-	const [id, setId] = useState("");
+	const [parsedChats, setParsedChats] = useState(JSON.parse(chats));
+	const [selectedChat, setSelectedChat] = useState<any>(null);
+	const messagesQuery = trpc.proxy.message.me.useQuery(undefined, {
+		enabled: false,
+		refetchOnWindowFocus: false,
+		onSuccess: (data) => {
+			setParsedChats(data);
+		},
+	});
+
+	useEffect(() => {
+		if (!selectedChat) setSelectedChat(parsedChats[0]);
+	}, [parsedChats, selectedChat]);
 
 	const socketInitializer = async (userId: string) => {
 		await fetch("/api/socket");
@@ -20,16 +35,17 @@ const Chat: NextPage<{ chats: string }> = ({ chats }) => {
 		socket = io({ autoConnect: false });
 		socket.auth = { userId };
 		socket.connect();
-		socket.onAny((event, ...args) => {
-			console.log(event, args);
+		socket.on("new-message", () => {
+			messagesQuery.refetch();
 		});
 	};
 
 	useEffect(() => {
 		if (status !== "authenticated") return;
 		socketInitializer(session.user!.id);
-		() => socket.offAny();
 	}, [status, session]);
+
+	// TODO: dodać debounce na refetchu?, dodawać message do bazy danych i do listy wiadomości selectedChat + fix zależności useEffecta wyżej
 
 	if (status === "loading") {
 		return (
@@ -53,27 +69,26 @@ const Chat: NextPage<{ chats: string }> = ({ chats }) => {
 		);
 	}
 
+	const emitPrivateMessage = (userId: string) => {
+		socket.emit("private-message", {
+			userId,
+		});
+	};
+
 	return (
 		<div className="flex-auto flex items-center">
-			{chats && <UserChat chats={chats} />}
-			{/* <input
-				type="text"
-				id="id"
-				name="id"
-				placeholder="id"
-				value={id}
-				onChange={(e) => setId(e.target.value)}
-			/>
-			<button
-				onClick={() => {
-					// socket.emit("private-message", {
-					// 	msg: "Hi from client!",
-					// 	userId: id,
-					// });
-				}}
-			>
-				Send
-			</button> */}
+			<div className="container mx-auto">
+				<div className="min-w-full border rounded lg:grid lg:grid-cols-3">
+					<ChatsList
+						parsedChats={parsedChats}
+						setSelectedChat={setSelectedChat}
+					/>
+					<UserChat
+						selectedChat={selectedChat}
+						emitPrivateMessage={emitPrivateMessage}
+					/>
+				</div>
+			</div>
 		</div>
 	);
 };
@@ -90,34 +105,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 		};
 	}
 
-	const chats = await prisma.chat.findMany({
-		where: {
-			users: {
-				some: {
-					userId: session.user.id,
-				},
-			},
-		},
-		include: {
-			messages: true,
-			users: {
-				include: {
-					user: true,
-				},
-			},
-		},
-		orderBy: {
-			updatedAt: "desc",
-		},
-	});
-
-	const chatsWithSortedMessages = chats.map((chat) => ({
-		...chat,
-		messages: chat.messages.sort(
-			(a, b) => b.createdAt.getTime() - a.createdAt.getTime()
-		),
-		users: chat.users.filter((user) => user.userId !== session.user!.id)[0]
-	}));
+	const chatsWithSortedMessages = await fetchUsers(prisma, session.user.id);
 
 	return {
 		props: {

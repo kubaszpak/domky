@@ -1,4 +1,5 @@
 import { createSchema, searchSchema } from "@/components/utils/schemas";
+import { ReservationStatus } from "@prisma/client";
 import { z } from "zod";
 import { authedProcedure, t } from "../utils";
 
@@ -51,6 +52,7 @@ export const listingRouter = t.router({
 					},
 					reservations: {
 						none: {
+							status: ReservationStatus.CONFIRMED,
 							dateRange: {
 								start: {
 									lt: input.date_end,
@@ -70,15 +72,17 @@ export const listingRouter = t.router({
 				},
 			});
 		}),
-	get: t.procedure.input(z.string().nullable()).query(async ({ input: id, ctx }) => {
-		if (!id) return;
-		return await ctx.prisma.listing.findFirst({
-			where: {
-				id: id,
-			},
-			include: {
-				availability: true
-			}
-		});
-	}),
+	get: t.procedure
+		.input(z.string().nullable())
+		.query(async ({ input: id, ctx }) => {
+			if (!id) return;
+			return await ctx.prisma.listing.findFirst({
+				where: {
+					id: id,
+				},
+				include: {
+					availability: true,
+				},
+			});
+		}),
 });

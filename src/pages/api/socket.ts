@@ -37,8 +37,8 @@ export default async function SocketHandler(
 
 	io.on("connection", (socket) => {
 		socket.join((socket as any).userId);
-		socket.on("private-message", ({ msg, userId }) => {
-			socket.to(userId).emit("new-message", msg);
+		socket.on("private-message", ({ userId }) => {
+			socket.to(userId).emit("new-message");
 		});
 	});
 

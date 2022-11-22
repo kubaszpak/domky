@@ -90,3 +90,9 @@ div#__next > div {
 .chat-height {
 	height: calc(100vh - 10rem);
 }
+
+.truncate {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
