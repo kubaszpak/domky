@@ -17,10 +17,7 @@ let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 const socketInitializer = async (userId: string) => {
 	await fetch("/api/socket");
 
-	socket = io({
-		transports: ["websocket"],
-		secure: true,
-	});
+	socket = io();
 
 	socket.on("refetch", () => {
 		console.log("Refetch");
