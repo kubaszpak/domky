@@ -1,12 +1,11 @@
-import { trpc } from "@/utils/trpc";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { BiSend } from "react-icons/bi";
 
 interface UserChatProps {
 	selectedChat: any;
-	emitPrivateMessage: (userId: string, msg: string) => void;
+	emitPrivateMessage: (userId: string, message: string) => void;
 }
 
 const UserChat: React.FC<UserChatProps> = ({
@@ -28,7 +27,7 @@ const UserChat: React.FC<UserChatProps> = ({
 	};
 
 	return (
-		<div className="hidden lg:col-span-2 lg:block">
+		<div className="hidden lg:col-span-2 lg:block chat-height">
 			<div className="w-full flex flex-col h-full">
 				<div className="relative flex items-center p-5 border-b border-gray-300">
 					<div className="object-cover relative w-10 h-10 rounded-full overflow-hidden">

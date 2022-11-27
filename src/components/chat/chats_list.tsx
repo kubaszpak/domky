@@ -13,9 +13,11 @@ const ChatsList: React.FC<ChatsListProps> = ({
 	return (
 		<div className="border-r border-gray-300 lg:col-span-1 chat-height overflow-y-auto">
 			<ul>
-				<h2 className="my-5 ml-5 border-b text-lg font-semibold text-gray-600">
-					Chats
-				</h2>
+				<div className="border-b">
+					<h2 className="my-5 ml-5 text-lg font-semibold text-gray-600">
+						Chats
+					</h2>
+				</div>
 				{parsedChats &&
 					parsedChats.length > 0 &&
 					parsedChats.map((chat: any) => {

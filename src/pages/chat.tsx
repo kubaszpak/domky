@@ -2,52 +2,69 @@ import { Spinner } from "flowbite-react";
 import { GetServerSideProps, NextPage } from "next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
 import { signIn, useSession } from "next-auth/react";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { authOptions } from "./api/auth/[...nextauth]";
-import { io, Socket } from "socket.io-client";
-import { DefaultEventsMap } from "@socket.io/component-emitter";
 import { prisma } from "@/server/db/client";
 import UserChat from "@/components/chat/user_chat";
 import { fetchUsers } from "@/server/trpc/router/message";
 import ChatsList from "@/components/chat/chats_list";
+import Pusher from "pusher-js";
+import axios from "axios";
 import { trpc } from "@/utils/trpc";
 
-let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
-
-const socketInitializer = async (userId: string) => {
-	await fetch("/api/socket");
-
-	socket = io();
-
-	socket.on("refetch", () => {
-		console.log("Refetch");
-		// messagesQuery.refetch();
-	});
-	socket.emit("join", { userId: userId });
-};
-
+let pusher: Pusher;
 const Chat: NextPage<{ chats: string }> = ({ chats }) => {
 	const { data: session, status } = useSession();
 	const [parsedChats, setParsedChats] = useState(JSON.parse(chats));
-	console.log(parsedChats);
 	const [selectedChat, setSelectedChat] = useState<any>(null);
-	// const messagesQuery = trpc.proxy.message.me.useQuery(undefined, {
-	// 	enabled: false,
-	// 	refetchOnWindowFocus: false,
-	// 	onSuccess: (data) => {
-	// 		setParsedChats(data);
-	// 	},
-	// });
+	const {
+		status: queryStatus,
+		refetch: refetchQuery,
+		data,
+	} = trpc.proxy.message.me.useQuery(undefined, {
+		enabled: false,
+		refetchOnWindowFocus: false,
+	});
 
 	useEffect(() => {
-		if (!selectedChat) setSelectedChat(parsedChats[0]);
+		if (queryStatus === "success") {
+			setParsedChats(data);
+		}
+	}, [queryStatus, data]);
+
+	useEffect(() => {
+		if (parsedChats && parsedChats.length > 0) {
+			if (!selectedChat) {
+				setSelectedChat(parsedChats[0]);
+				return;
+			}
+			setSelectedChat(
+				parsedChats.find((chat: any) => chat.id === selectedChat.id)
+			);
+		}
 	}, [parsedChats, selectedChat]);
 
 	useEffect(() => {
 		if (status !== "authenticated") return;
 		console.log("Socket initialization " + session.user!.id);
-		socketInitializer(session.user!.id);
-	}, [status, session]);
+		pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
+			cluster: "eu",
+		});
+
+		const channel = pusher.subscribe(session.user!.id);
+
+		channel.bind("message", () => {
+			setTimeout(() => {
+				refetchQuery({
+					cancelRefetch: false,
+				});
+			}, 1000);
+		});
+
+		return () => {
+			pusher.unsubscribe(session.user!.id);
+		};
+	}, [status, session, refetchQuery]);
 
 	if (status === "loading") {
 		return (
@@ -71,12 +88,11 @@ const Chat: NextPage<{ chats: string }> = ({ chats }) => {
 		);
 	}
 
-	const emitPrivateMessage = (userId: string, msg: string) => {
-		console.log(userId, msg);
-		socket.emit("private-message", {
-			from: session.user!.id,
-			to: userId,
-			msg,
+	const emitPrivateMessage = (userId: string, message: string) => {
+		axios.post("api/pusher", {
+			message,
+			senderId: session.user!.id,
+			recipientId: userId,
 		});
 	};
 
