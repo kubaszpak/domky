@@ -42,7 +42,7 @@ export async function fetchUsers(
 	const chatsWithSortedMessages = chats.map((chat) => ({
 		...chat,
 		messages: chat.messages.sort(
-			(a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+			(a, b) => a.createdAt.getTime() - b.createdAt.getTime()
 		),
 		users: chat.users.filter((user) => user.userId !== id)[0],
 	}));

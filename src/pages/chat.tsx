@@ -2,7 +2,7 @@ import { Spinner } from "flowbite-react";
 import { GetServerSideProps, NextPage } from "next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
 import { signIn, useSession } from "next-auth/react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { io, Socket } from "socket.io-client";
 import { DefaultEventsMap } from "@socket.io/component-emitter";
@@ -13,9 +13,23 @@ import ChatsList from "@/components/chat/chats_list";
 import { trpc } from "@/utils/trpc";
 
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
+
+const socketInitializer = async (userId: string) => {
+	await fetch("/api/socket");
+
+	socket = io();
+
+	socket.on("refetch", () => {
+		console.log("Refetch");
+		// messagesQuery.refetch();
+	});
+	socket.emit("join", { userId: userId });
+};
+
 const Chat: NextPage<{ chats: string }> = ({ chats }) => {
 	const { data: session, status } = useSession();
 	const [parsedChats, setParsedChats] = useState(JSON.parse(chats));
+	console.log(parsedChats);
 	const [selectedChat, setSelectedChat] = useState<any>(null);
 	const messagesQuery = trpc.proxy.message.me.useQuery(undefined, {
 		enabled: false,
@@ -29,23 +43,11 @@ const Chat: NextPage<{ chats: string }> = ({ chats }) => {
 		if (!selectedChat) setSelectedChat(parsedChats[0]);
 	}, [parsedChats, selectedChat]);
 
-	const socketInitializer = async (userId: string) => {
-		await fetch("/api/socket");
-
-		socket = io({ autoConnect: false });
-		socket.auth = { userId };
-		socket.connect();
-		socket.on("new-message", () => {
-			messagesQuery.refetch();
-		});
-	};
-
 	useEffect(() => {
 		if (status !== "authenticated") return;
+		console.log("Socket initialization " + session.user!.id);
 		socketInitializer(session.user!.id);
 	}, [status, session]);
-
-	// TODO: dodać debounce na refetchu?, dodawać message do bazy danych i do listy wiadomości selectedChat + fix zależności useEffecta wyżej
 
 	if (status === "loading") {
 		return (
@@ -69,9 +71,12 @@ const Chat: NextPage<{ chats: string }> = ({ chats }) => {
 		);
 	}
 
-	const emitPrivateMessage = (userId: string) => {
+	const emitPrivateMessage = (userId: string, msg: string) => {
+		console.log(userId, msg);
 		socket.emit("private-message", {
-			userId,
+			from: session.user!.id,
+			to: userId,
+			msg,
 		});
 	};
 

@@ -6,7 +6,7 @@ import { BiSend } from "react-icons/bi";
 
 interface UserChatProps {
 	selectedChat: any;
-	emitPrivateMessage: (userId: string) => void;
+	emitPrivateMessage: (userId: string, msg: string) => void;
 }
 
 const UserChat: React.FC<UserChatProps> = ({
@@ -19,7 +19,11 @@ const UserChat: React.FC<UserChatProps> = ({
 	const handleSend = (e: React.FormEvent<HTMLFormElement>) => {
 		if (!selectedChat) return;
 		e.preventDefault();
-		emitPrivateMessage(selectedChat.users.userId);
+		emitPrivateMessage(selectedChat.users.userId, message);
+		selectedChat.messages.push({
+			senderId: session?.user?.id,
+			content: message,
+		});
 		setMessage("");
 	};
 
@@ -41,11 +45,11 @@ const UserChat: React.FC<UserChatProps> = ({
 				<div className="relative w-full p-6 overflow-y-auto flex-1">
 					<ul className="space-y-2">
 						{selectedChat &&
-							selectedChat.messages.map((message: any) => {
+							selectedChat.messages.map((message: any, idx: number) => {
 								const messageFromSelf = message.senderId === session?.user!.id;
 								return (
 									<li
-										key={message.id}
+										key={message.id ? message.id : idx}
 										className={`flex ${
 											messageFromSelf ? "justify-end" : "justify-start"
 										}`}
