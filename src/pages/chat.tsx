@@ -31,13 +31,13 @@ const Chat: NextPage<{ chats: string }> = ({ chats }) => {
 	const [parsedChats, setParsedChats] = useState(JSON.parse(chats));
 	console.log(parsedChats);
 	const [selectedChat, setSelectedChat] = useState<any>(null);
-	const messagesQuery = trpc.proxy.message.me.useQuery(undefined, {
-		enabled: false,
-		refetchOnWindowFocus: false,
-		onSuccess: (data) => {
-			setParsedChats(data);
-		},
-	});
+	// const messagesQuery = trpc.proxy.message.me.useQuery(undefined, {
+	// 	enabled: false,
+	// 	refetchOnWindowFocus: false,
+	// 	onSuccess: (data) => {
+	// 		setParsedChats(data);
+	// 	},
+	// });
 
 	useEffect(() => {
 		if (!selectedChat) setSelectedChat(parsedChats[0]);
@@ -88,10 +88,12 @@ const Chat: NextPage<{ chats: string }> = ({ chats }) => {
 						parsedChats={parsedChats}
 						setSelectedChat={setSelectedChat}
 					/>
-					<UserChat
-						selectedChat={selectedChat}
-						emitPrivateMessage={emitPrivateMessage}
-					/>
+					{selectedChat && (
+						<UserChat
+							selectedChat={selectedChat}
+							emitPrivateMessage={emitPrivateMessage}
+						/>
+					)}
 				</div>
 			</div>
 		</div>
