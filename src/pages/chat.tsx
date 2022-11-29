@@ -26,6 +26,8 @@ const Chat: NextPage<{ chats: string }> = ({ chats }) => {
 		refetchOnWindowFocus: false,
 	});
 
+	console.log(queryStatus);
+
 	useEffect(() => {
 		if (queryStatus === "success") {
 			setParsedChats(data);
@@ -96,7 +98,7 @@ const Chat: NextPage<{ chats: string }> = ({ chats }) => {
 
 	const back = () => {
 		setSelectedChat(null);
-	}
+	};
 
 	return (
 		<div className="flex-auto flex items-center">

@@ -4,6 +4,9 @@ import React, { useState } from "react";
 import { BiSend } from "react-icons/bi";
 import BookingPreview from "../listing/booking_preview";
 import { BiArrowBack } from "react-icons/bi";
+import { BsCheckLg, BsXLg } from "react-icons/bs";
+import { Button, Modal } from "flowbite-react";
+import { HiOutlineExclamationCircle } from "react-icons/hi";
 
 interface UserChatProps {
 	selectedChat: any;
@@ -20,6 +23,7 @@ const UserChat: React.FC<UserChatProps> = ({
 }) => {
 	const [message, setMessage] = useState("");
 	const { data: session } = useSession();
+	const [modal, setModal] = useState<null | "accept" | "deny">(null);
 
 	const handleSend = (e: React.FormEvent<HTMLFormElement>) => {
 		if (!selectedChat) return;
@@ -82,20 +86,79 @@ const UserChat: React.FC<UserChatProps> = ({
 															const listing = message.reservation.listing;
 															const dateRange = message.reservation.dateRange;
 															return (
-																<div className="mt-3 border-2 p-3 flex">
-																	<div>
-																		<h1 className="mb-3">
-																			Reservation request for:
-																			<br />
-																			<b>{listing.name}</b>
-																		</h1>
-																		<BookingPreview
-																			images={listing.images}
-																			date_start={new Date(dateRange.start)}
-																			date_end={new Date(dateRange.end)}
-																		/>
+																<>
+																	<div className="mt-3 overflow-hidden rounded p-0.5 bg-gradient-to-br from-gray-800 to-gray-600">
+																		<div className="text-white font-semibold p-3">
+																			<div>
+																				<h1 className="mb-3">
+																					Reservation request for:
+																					<br />
+																					<span className="font-black">
+																						{listing.name}
+																					</span>
+																				</h1>
+																				<BookingPreview
+																					images={listing.images}
+																					date_start={new Date(dateRange.start)}
+																					date_end={new Date(dateRange.end)}
+																				/>
+																			</div>
+																			<div className="mt-3">
+																				<button
+																					onClick={() => setModal("accept")}
+																					className="relative items-center transition-all ease-in duration-75 border-4 border-white justify-center px-5 py-2.5 mb-2 mr-2 overflow-hidden rounded-lg hover:bg-gradient-to-br hover:from-white hover:to-slate-200 hover:text-gray-700 focus:outline-none"
+																				>
+																					<BsCheckLg />
+																				</button>
+																				<button
+																					onClick={() => setModal("deny")}
+																					className="relative items-center transition-all ease-in duration-75 border-4 border-white justify-center px-5 py-2.5 mb-2 mr-2 overflow-hidden rounded-lg hover:bg-gradient-to-br hover:from-white hover:to-slate-200 hover:text-gray-700 focus:outline-none"
+																				>
+																					<BsXLg />
+																				</button>
+																			</div>
+																		</div>
 																	</div>
-																</div>
+
+																	<Modal
+																		show={!!modal}
+																		size="md"
+																		popup={true}
+																		onClose={() => setModal(null)}
+																	>
+																		<Modal.Header />
+																		<Modal.Body>
+																			<div className="text-center">
+																				{modal === "accept" ? (
+																					<BsCheckLg className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
+																				) : (
+																					<HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
+																				)}
+																				<h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+																					Are you sure you want to {modal} this
+																					request?
+																				</h3>
+																				<div className="flex justify-center gap-4">
+																					<Button
+																						gradientMonochrome={`${
+																							modal === "accept"
+																								? "success"
+																								: "failure"
+																						}`}
+																					>
+																						Yes, I&apos;m sure
+																					</Button>
+																					<Button
+																						color="gray"
+																						onClick={() => setModal(null)}
+																					>
+																						No, cancel
+																					</Button>
+																				</div>
+																			</div>
+																		</Modal.Body>
+																	</Modal>
+																</>
 															);
 														})()}
 												</>
