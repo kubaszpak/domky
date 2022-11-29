@@ -27,7 +27,16 @@ export async function fetchUsers(
 			},
 		},
 		include: {
-			messages: true,
+			messages: {
+				include: {
+					reservation: {
+						include: {
+							listing: true,
+							dateRange: true,
+						}
+					},
+				}
+			},
 			users: {
 				include: {
 					user: true,

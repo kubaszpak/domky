@@ -4,14 +4,20 @@ import React from "react";
 interface ChatsListProps {
 	parsedChats: any;
 	setSelectedChat: any;
+	hideOnMobile: boolean;
 }
 
 const ChatsList: React.FC<ChatsListProps> = ({
 	parsedChats,
 	setSelectedChat,
+	hideOnMobile,
 }) => {
 	return (
-		<div className="border-r border-gray-300 lg:col-span-1 chat-height overflow-y-auto">
+		<div
+			className={`${
+				hideOnMobile && "hidden lg:block"
+			} border-r border-gray-300 col-span-3 lg:col-span-1 chat-height overflow-y-auto`}
+		>
 			<ul>
 				<div className="border-b">
 					<h2 className="my-5 ml-5 text-lg font-semibold text-gray-600">

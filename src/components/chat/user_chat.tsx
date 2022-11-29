@@ -2,15 +2,21 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import React, { useState } from "react";
 import { BiSend } from "react-icons/bi";
+import BookingPreview from "../listing/booking_preview";
+import { BiArrowBack } from "react-icons/bi";
 
 interface UserChatProps {
 	selectedChat: any;
 	emitPrivateMessage: (userId: string, message: string) => void;
+	hideOnMobile: boolean;
+	back: () => void;
 }
 
 const UserChat: React.FC<UserChatProps> = ({
 	selectedChat,
 	emitPrivateMessage,
+	hideOnMobile,
+	back,
 }) => {
 	const [message, setMessage] = useState("");
 	const { data: session } = useSession();
@@ -27,25 +33,35 @@ const UserChat: React.FC<UserChatProps> = ({
 	};
 
 	return (
-		<div className="hidden lg:col-span-2 lg:block chat-height">
+		<div
+			className={`${
+				hideOnMobile && "hidden lg:block"
+			} lg:col-span-2 chat-height`}
+		>
 			<div className="w-full flex flex-col h-full">
-				<div className="relative flex items-center p-5 border-b border-gray-300">
-					<div className="object-cover relative w-10 h-10 rounded-full overflow-hidden">
-						<Image
-							src={selectedChat.users.user.image}
-							alt="Profile image"
-							layout="fill"
-						/>
+				<div className="relative flex items-center p-5 border-b border-gray-300 justify-between">
+					<div className="flex items-center">
+						<div className="object-cover relative w-10 h-10 rounded-full overflow-hidden">
+							<Image
+								src={selectedChat.users.user.image}
+								alt="Profile image"
+								layout="fill"
+							/>
+						</div>
+						<span className="block ml-2 font-bold text-gray-600">
+							{selectedChat.users.user.name}
+						</span>
 					</div>
-					<span className="block ml-2 font-bold text-gray-600">
-						{selectedChat.users.user.name}
-					</span>
+					<button className="lg:hidden" onClick={() => back()}>
+						<BiArrowBack size={28} />
+					</button>
 				</div>
-				<div className="relative w-full p-6 overflow-y-auto flex-1">
+				<div className="relative w-full p-6 overflow-y-auto flex flex-col-reverse column flex-1">
 					<ul className="space-y-2">
 						{selectedChat &&
 							selectedChat.messages.map((message: any, idx: number) => {
 								const messageFromSelf = message.senderId === session?.user!.id;
+
 								return (
 									<li
 										key={message.id ? message.id : idx}
@@ -58,7 +74,32 @@ const UserChat: React.FC<UserChatProps> = ({
 												messageFromSelf && "bg-gray-100"
 											}`}
 										>
-											<span className="block">{message.content}</span>
+											<span className="block">
+												{message.content}
+												<>
+													{!!message.reservation &&
+														(() => {
+															const listing = message.reservation.listing;
+															const dateRange = message.reservation.dateRange;
+															return (
+																<div className="mt-3 border-2 p-3 flex">
+																	<div>
+																		<h1 className="mb-3">
+																			Reservation request for:
+																			<br />
+																			<b>{listing.name}</b>
+																		</h1>
+																		<BookingPreview
+																			images={listing.images}
+																			date_start={new Date(dateRange.start)}
+																			date_end={new Date(dateRange.end)}
+																		/>
+																	</div>
+																</div>
+															);
+														})()}
+												</>
+											</span>
 										</div>
 									</li>
 								);

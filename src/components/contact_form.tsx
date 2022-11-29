@@ -3,8 +3,8 @@ import { trpc } from "@/utils/trpc";
 import { DateRange, Listing } from "@prisma/client";
 import { Modal } from "flowbite-react";
 import { signIn, useSession } from "next-auth/react";
-import Image from "next/image";
 import React, { useState } from "react";
+import BookingPreview from "./listing/booking_preview";
 
 interface ContactFormProps {
 	showModal: boolean;
@@ -31,7 +31,6 @@ function ContactForm({
 	const [message, setMessage] = useState(defaultMessage);
 	const { data: session, status } = useSession();
 	const sendMutation = trpc.proxy.message.contact.useMutation();
-	console.log(sendMutation);
 
 	return (
 		<Modal show={showModal} onClose={() => setShowModal(false)}>
@@ -41,21 +40,12 @@ function ContactForm({
 						Booking the apartment <b>{listing.name}</b>
 					</Modal.Header>
 					<Modal.Body>
-						<Image
-							src={`https://res.cloudinary.com/${
-								process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
-							}/image/upload/${listing.images.split("@@@")[0]}`}
-							alt={`Apartment image `}
-							height={90}
-							width={160}
+						<BookingPreview
+							images={listing.images}
+							date_start={date_start}
+							date_end={date_end}
 						/>
-						<div className="my-5">
-							Dates:{" "}
-							{`${date_start.getDate()} ${
-								dates[date_start.getMonth()]
-							} - ${date_end.getDate()} ${dates[date_end.getMonth()]}`}
-						</div>
-						<div>
+						<div className="mt-3">
 							<label
 								htmlFor="message"
 								className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"

@@ -34,15 +34,13 @@ const Chat: NextPage<{ chats: string }> = ({ chats }) => {
 
 	useEffect(() => {
 		if (parsedChats && parsedChats.length > 0) {
-			if (!selectedChat) {
-				setSelectedChat(parsedChats[0]);
-				return;
-			}
-			setSelectedChat(
-				parsedChats.find((chat: any) => chat.id === selectedChat.id)
+			setSelectedChat((prev: any) =>
+				!!prev
+					? parsedChats.find((chat: any) => chat.id === prev.id)
+					: parsedChats[0]
 			);
 		}
-	}, [parsedChats, selectedChat]);
+	}, [parsedChats]);
 
 	useEffect(() => {
 		if (status !== "authenticated") return;
@@ -96,6 +94,10 @@ const Chat: NextPage<{ chats: string }> = ({ chats }) => {
 		});
 	};
 
+	const back = () => {
+		setSelectedChat(null);
+	}
+
 	return (
 		<div className="flex-auto flex items-center">
 			<div className="container mx-auto">
@@ -103,11 +105,14 @@ const Chat: NextPage<{ chats: string }> = ({ chats }) => {
 					<ChatsList
 						parsedChats={parsedChats}
 						setSelectedChat={setSelectedChat}
+						hideOnMobile={!!selectedChat}
 					/>
 					{selectedChat && (
 						<UserChat
 							selectedChat={selectedChat}
 							emitPrivateMessage={emitPrivateMessage}
+							hideOnMobile={!selectedChat}
+							back={back}
 						/>
 					)}
 				</div>
