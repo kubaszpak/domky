@@ -2,8 +2,8 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { DateRangeInput } from "@datepicker-react/styled";
 import React, { useReducer, useState } from "react";
-import { useZodForm } from "@/components/utils/zod";
-import { searchSchema } from "@/components/utils/schemas";
+import { useZodForm } from "@/utils/zod";
+import { searchSchema } from "@/utils/schemas";
 import { useLoadScript } from "@react-google-maps/api";
 import Autocomplete from "@/components/maps/autocomplete";
 import { Controller } from "react-hook-form";
@@ -13,7 +13,7 @@ import {
 	initialState,
 	reducer,
 } from "@/types/dates";
-import useWindowSize from "@/components/utils/use_window_size";
+import useWindowSize from "@/utils/use_window_size";
 import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
@@ -52,13 +52,13 @@ const Home: NextPage = () => {
 				</h1>
 				<form
 					onSubmit={handleSubmit(async (data) => {
-						router.push(
-							{
-								pathname: `/find/${data.where
-									}/${data.date_start.toUTCString()}/${data.date_end.toUTCString()}/${data.guests
-									}`,
-							}
-						);
+						router.push({
+							pathname: `/find/${
+								data.where
+							}/${data.date_start.toUTCString()}/${data.date_end.toUTCString()}/${
+								data.guests
+							}`,
+						});
 					})}
 					className="flex flex-col lg:flex-row items-center justify-center gap-4"
 				>

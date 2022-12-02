@@ -1,4 +1,4 @@
-import { searchSchema } from "@/components/utils/schemas";
+import { searchSchema } from "@/utils/schemas";
 import { trpc } from "@/utils/trpc";
 import Image from "next/image";
 import { useRouter } from "next/router";

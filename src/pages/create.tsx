@@ -1,7 +1,7 @@
 import { trpc } from "@/utils/trpc";
 import type { NextPage } from "next";
-import { useZodForm } from "@/components/utils/zod";
-import { createSchema } from "@/components/utils/schemas";
+import { useZodForm } from "@/utils/zod";
+import { createSchema } from "@/utils/schemas";
 import { useCallback, useEffect, useReducer, useState } from "react";
 import { Wrapper } from "@googlemaps/react-wrapper";
 import Map from "@/components/maps/map";
@@ -16,7 +16,7 @@ import {
 	reducer,
 } from "@/types/dates";
 import { DateRangeInput } from "@datepicker-react/styled";
-import useWindowSize from "@/components/utils/use_window_size";
+import useWindowSize from "@/utils/use_window_size";
 import { useRouter } from "next/router";
 
 const ListingCreator: NextPage = () => {

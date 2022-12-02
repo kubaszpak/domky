@@ -1,4 +1,4 @@
-import { createSchema, searchSchema } from "@/components/utils/schemas";
+import { createSchema, searchSchema } from "@/utils/schemas";
 import { ReservationStatus } from "@prisma/client";
 import { z } from "zod";
 import { authedProcedure, t } from "../utils";
