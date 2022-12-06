@@ -1,3 +1,4 @@
+import { ReservationStatus } from "@prisma/client";
 import { z } from "zod";
 
 export const createSchema = z.object({
@@ -9,12 +10,20 @@ export const createSchema = z.object({
 	date_start: z.date(),
 	date_end: z.date(),
 	images: z.string().max(500),
-	city: z.string()
+	city: z.string(),
 });
 
 export const searchSchema = z.object({
 	where: z.string(),
 	guests: z.number().positive().max(10),
 	date_start: z.date(),
-	date_end: z.date()
-})
+	date_end: z.date(),
+});
+
+const statusType = z.nativeEnum(ReservationStatus);
+
+export const updateReservationStatusSchema = z.object({
+	reservationId: z.string(),
+	listingOwnerId: z.string(),
+	status: statusType,
+});

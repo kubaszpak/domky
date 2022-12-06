@@ -21,10 +21,7 @@ const Chat: NextPage<{ chats: string }> = ({ chats }) => {
 		status: queryStatus,
 		refetch: refetchQuery,
 		data,
-	} = trpc.proxy.message.me.useQuery(undefined, {
-		enabled: false,
-		refetchOnWindowFocus: false,
-	});
+	} = trpc.proxy.message.me.useQuery();
 
 	console.log(queryStatus);
 

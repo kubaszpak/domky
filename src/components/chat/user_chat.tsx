@@ -7,12 +7,20 @@ import { BiArrowBack } from "react-icons/bi";
 import { BsCheckLg, BsXLg } from "react-icons/bs";
 import { Button, Modal } from "flowbite-react";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
+import { trpc } from "@/utils/trpc";
+import { ReservationStatus } from "@prisma/client";
 
 interface UserChatProps {
 	selectedChat: any;
 	emitPrivateMessage: (userId: string, message: string) => void;
 	hideOnMobile: boolean;
 	back: () => void;
+}
+
+interface ModalActionType {
+	action: "accept" | "deny";
+	reservationId: string;
+	listingOwnerId: string;
 }
 
 const UserChat: React.FC<UserChatProps> = ({
@@ -23,7 +31,7 @@ const UserChat: React.FC<UserChatProps> = ({
 }) => {
 	const [message, setMessage] = useState("");
 	const { data: session } = useSession();
-	const [modal, setModal] = useState<null | "accept" | "deny">(null);
+	const [modal, setModal] = useState<null | ModalActionType>(null);
 
 	const handleSend = (e: React.FormEvent<HTMLFormElement>) => {
 		if (!selectedChat) return;
@@ -35,6 +43,8 @@ const UserChat: React.FC<UserChatProps> = ({
 		});
 		setMessage("");
 	};
+
+	const changeReservationStatus = trpc.proxy.reservation.status.useMutation();
 
 	return (
 		<div
@@ -88,7 +98,7 @@ const UserChat: React.FC<UserChatProps> = ({
 															return (
 																<>
 																	<div className="mt-3 overflow-hidden rounded p-0.5 bg-gradient-to-br from-gray-800 to-gray-600">
-																		<div className="text-white font-semibold p-3">
+																		<div className="text-white font-semibold p-3 sm:flex w-full">
 																			<div>
 																				<h1 className="mb-3">
 																					Reservation request for:
@@ -103,19 +113,53 @@ const UserChat: React.FC<UserChatProps> = ({
 																					date_end={new Date(dateRange.end)}
 																				/>
 																			</div>
-																			<div className="mt-3">
-																				<button
-																					onClick={() => setModal("accept")}
-																					className="relative items-center transition-all ease-in duration-75 border-4 border-white justify-center px-5 py-2.5 mb-2 mr-2 overflow-hidden rounded-lg hover:bg-gradient-to-br hover:from-white hover:to-slate-200 hover:text-gray-700 focus:outline-none"
-																				>
-																					<BsCheckLg />
-																				</button>
-																				<button
-																					onClick={() => setModal("deny")}
-																					className="relative items-center transition-all ease-in duration-75 border-4 border-white justify-center px-5 py-2.5 mb-2 mr-2 overflow-hidden rounded-lg hover:bg-gradient-to-br hover:from-white hover:to-slate-200 hover:text-gray-700 focus:outline-none"
-																				>
-																					<BsXLg />
-																				</button>
+																			<div className="mt-3 sm:flex flex-1 gap-4 flex-col items-center justify-center">
+																				{message.reservation.status ===
+																				ReservationStatus.PENDING ? (
+																					changeReservationStatus.isIdle && (
+																						<>
+																							<button
+																								onClick={() =>
+																									setModal({
+																										action: "accept",
+																										listingOwnerId:
+																											listing.userId,
+																										reservationId:
+																											message.reservation.id,
+																									})
+																								}
+																								className="relative items-center transition-all ease-in duration-75 border-4 border-white justify-center px-5 py-2.5 mb-2 mr-2 overflow-hidden rounded-lg hover:bg-gradient-to-br hover:from-white hover:to-slate-200 hover:text-gray-700 focus:outline-none"
+																							>
+																								<BsCheckLg />
+																							</button>
+																							<button
+																								onClick={() =>
+																									setModal({
+																										action: "deny",
+																										listingOwnerId:
+																											listing.userId,
+																										reservationId:
+																											message.reservation.id,
+																									})
+																								}
+																								className="relative items-center transition-all ease-in duration-75 border-4 border-white justify-center px-5 py-2.5 mb-2 mr-2 overflow-hidden rounded-lg hover:bg-gradient-to-br hover:from-white hover:to-slate-200 hover:text-gray-700 focus:outline-none"
+																							>
+																								<BsXLg />
+																							</button>
+																						</>
+																					)
+																				) : message.reservation.status ===
+																				  ReservationStatus.CONFIRMED ? (
+																					<>
+																						<div>Confirmed</div>
+																						<BsCheckLg size={56} />
+																					</>
+																				) : (
+																					<>
+																						<div>Declined</div>
+																						<BsXLg size={56} />
+																					</>
+																				)}
 																			</div>
 																		</div>
 																	</div>
@@ -129,22 +173,36 @@ const UserChat: React.FC<UserChatProps> = ({
 																		<Modal.Header />
 																		<Modal.Body>
 																			<div className="text-center">
-																				{modal === "accept" ? (
+																				{modal?.action === "accept" ? (
 																					<BsCheckLg className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
 																				) : (
 																					<HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
 																				)}
 																				<h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-																					Are you sure you want to {modal} this
-																					request?
+																					Are you sure you want to{" "}
+																					{modal?.action} this request?
 																				</h3>
 																				<div className="flex justify-center gap-4">
 																					<Button
 																						gradientMonochrome={`${
-																							modal === "accept"
+																							modal?.action === "accept"
 																								? "success"
 																								: "failure"
 																						}`}
+																						onClick={() => {
+																							changeReservationStatus.mutate({
+																								status:
+																									modal!.action === "accept"
+																										? ReservationStatus.CONFIRMED
+																										: ReservationStatus.DECLINED,
+																								reservationId:
+																									modal!.reservationId,
+																								listingOwnerId:
+																									modal!.listingOwnerId,
+																							});
+																							setModal(null);
+																							// TODO: zrobić żeby znikała możliwość wyboru po wysłaniu requestu
+																						}}
 																					>
 																						Yes, I&apos;m sure
 																					</Button>
