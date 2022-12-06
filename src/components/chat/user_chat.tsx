@@ -113,10 +113,12 @@ const UserChat: React.FC<UserChatProps> = ({
 																					date_end={new Date(dateRange.end)}
 																				/>
 																			</div>
-																			<div className="mt-3 sm:flex flex-1 gap-4 flex-col items-center justify-center">
+																			<div className="mt-3 sm:mt-0 sm:flex flex-1 gap-4 flex-col items-center justify-center">
 																				{message.reservation.status ===
 																				ReservationStatus.PENDING ? (
-																					changeReservationStatus.isIdle && (
+																					changeReservationStatus.isIdle &&
+																					listing.userId ===
+																						session?.user?.id && (
 																						<>
 																							<button
 																								onClick={() =>
@@ -201,7 +203,6 @@ const UserChat: React.FC<UserChatProps> = ({
 																									modal!.listingOwnerId,
 																							});
 																							setModal(null);
-																							// TODO: zrobić żeby znikała możliwość wyboru po wysłaniu requestu
 																						}}
 																					>
 																						Yes, I&apos;m sure
