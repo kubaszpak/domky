@@ -15,11 +15,8 @@ export default async function MessageHandler(
 	res: NextApiResponse
 ) {
 	const { message, senderId, recipientId } = req.body;
-	const response = await pusher.trigger(recipientId, "message", {
-		message,
-		senderId,
-	});
 
+	// Zapis wiadomości do bazy danych
 	const chat = await prisma.chat.findFirstOrThrow({
 		where: {
 			users: {
@@ -54,6 +51,12 @@ export default async function MessageHandler(
 		data: {
 			updatedAt: new Date(),
 		},
+	});
+
+	// Powiadomienie klienta o nowej wiadomości
+	await pusher.trigger(recipientId, "message", {
+		message,
+		senderId,
 	});
 
 	res.json({ message: "Completed" });

@@ -23,8 +23,6 @@ const Chat: NextPage<{ chats: string }> = ({ chats }) => {
 		data,
 	} = trpc.proxy.message.me.useQuery();
 
-	console.log(queryStatus);
-
 	useEffect(() => {
 		if (queryStatus === "success") {
 			setParsedChats(data);
@@ -43,7 +41,6 @@ const Chat: NextPage<{ chats: string }> = ({ chats }) => {
 
 	useEffect(() => {
 		if (status !== "authenticated") return;
-		console.log("Socket initialization " + session.user!.id);
 		pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
 			cluster: "eu",
 		});

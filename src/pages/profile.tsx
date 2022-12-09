@@ -20,7 +20,7 @@ const Profile: NextPage = () => {
 	}
 
 	return (
-		<div className="container mx-auto my-5">
+		<div className="container mx-auto my-5 px-3">
 			<h1 className="text-2xl font-semibold text-gray-700">Listings</h1>
 			<Table hoverable={true}>
 				<Table.Head className="[&>*]:text-center">
