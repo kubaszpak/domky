@@ -1,11 +1,15 @@
 import { createSchema, searchSchema } from "@/utils/schemas";
-import { ReservationStatus } from "@prisma/client";
+import { ListingStatus, ReservationStatus } from "@prisma/client";
 import { z } from "zod";
 import { authedProcedure, t } from "../utils";
 
 export const listingRouter = t.router({
 	all: t.procedure.query(async ({ ctx }) => {
-		return await ctx.prisma.listing.findMany();
+		return await ctx.prisma.listing.findMany({
+			where: {
+				status: ListingStatus.ACTIVE,
+			},
+		});
 	}),
 	me: authedProcedure.query(async ({ ctx }) => {
 		return await ctx.prisma.listing.findMany({

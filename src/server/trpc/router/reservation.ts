@@ -1,6 +1,4 @@
 import { updateReservationStatusSchema } from "@/utils/schemas";
-import { ReservationStatus } from "@prisma/client";
-import { z } from "zod";
 import { t, authedProcedure } from "../utils";
 
 export const reservationRouter = t.router({
@@ -9,6 +7,9 @@ export const reservationRouter = t.router({
 			where: {
 				userId: ctx.session.user.id,
 			},
+			include: {
+				listing: true
+			}
 		});
 	}),
 	status: authedProcedure

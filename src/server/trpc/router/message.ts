@@ -63,17 +63,46 @@ export const messageRouter = t.router({
 	contact: authedProcedure
 		.input(sendSchema)
 		.mutation(async ({ input, ctx }) => {
+			if (ctx.session.user.id === input.listingOwnerId) {
+				return;
+			}
+
+			const chat = await ctx.prisma.chat.findFirst({
+				where: {
+					users: {
+						every: {
+							OR: [
+								{
+									userId: input.listingOwnerId,
+								},
+								{
+									userId: ctx.session.user.id,
+								},
+							],
+						},
+					},
+				},
+			});
+
 			return await ctx.prisma.message.create({
 				data: {
 					chat: {
-						create: {
-							users: {
-								create: [
-									{ user: { connect: { id: input.listingOwnerId } } },
-									{ user: { connect: { id: ctx.session.user.id } } },
-								],
-							},
-						},
+						...(!!chat
+							? {
+									connect: {
+										id: chat.id,
+									},
+							  }
+							: {
+									create: {
+										users: {
+											create: [
+												{ user: { connect: { id: input.listingOwnerId } } },
+												{ user: { connect: { id: ctx.session.user.id } } },
+											],
+										},
+									},
+							  }),
 					},
 					reservation: {
 						create: {
