@@ -27,3 +27,9 @@ export const updateReservationStatusSchema = z.object({
 	listingOwnerId: z.string(),
 	status: statusType,
 });
+
+export const changeListingsAvailabilitySchema = z.object({
+	listingId: z.string(),
+	dateStart: z.date(),
+	dateEnd: z.date(),
+});

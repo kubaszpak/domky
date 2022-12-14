@@ -1,5 +1,10 @@
-import { createSchema, searchSchema } from "@/utils/schemas";
+import {
+	changeListingsAvailabilitySchema,
+	createSchema,
+	searchSchema,
+} from "@/utils/schemas";
 import { ListingStatus, ReservationStatus } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { authedProcedure, t } from "../utils";
 
@@ -15,6 +20,9 @@ export const listingRouter = t.router({
 		return await ctx.prisma.listing.findMany({
 			where: {
 				userId: ctx.session.user.id,
+			},
+			include: {
+				availability: true,
 			},
 		});
 	}),
@@ -88,5 +96,54 @@ export const listingRouter = t.router({
 					availability: true,
 				},
 			});
+		}),
+	changeAvailability: authedProcedure
+		.input(changeListingsAvailabilitySchema)
+		.mutation(async ({ input, ctx }) => {
+			const listing = await ctx.prisma.listing.findFirstOrThrow({
+				where: {
+					id: input.listingId,
+				},
+				include: {
+					reservations: {
+						include: {
+							dateRange: true,
+						},
+					},
+				},
+			});
+
+			if (ctx.session.user.id !== listing.userId) return;
+
+			// make sure there are no reservation collisions in the future
+
+			for (const reservation of listing.reservations) {
+				if (
+					reservation.status !== ReservationStatus.CONFIRMED ||
+					reservation.dateRange.end < new Date()
+				)
+					continue;
+
+				if (
+					reservation.dateRange.start < input.dateStart ||
+					reservation.dateRange.end > input.dateEnd
+				) {
+					throw new TRPCError({
+						code: "CONFLICT",
+						message:
+							"There is a reservation conflicting with the new date range.",
+					});
+				}
+			}
+
+			// return await ctx.prisma.dateRange.update({
+			// 	where: {
+			// 		listingId: listing.id,
+			// 	},
+			// 	data: {
+			// 		start: input.dateStart,
+			// 		end: input.dateEnd,
+			// 	},
+			// });
 		}),
 });
