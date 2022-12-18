@@ -18,8 +18,20 @@ import {
 import { DateRangeInput } from "@datepicker-react/styled";
 import useWindowSize from "@/utils/use_window_size";
 import { useRouter } from "next/router";
+import Spinner from "@/components/spinner";
+import { useLoadScript } from "@react-google-maps/api";
 
-const ListingCreator: NextPage = () => {
+interface Props {
+	parsedId: string;
+}
+
+const ListingCreator: NextPage<Props> = ({ parsedId: listingId }) => {
+	const [libraries] = useState<Libraries>(["places"]);
+	useLoadScript({
+		id: "google-map-script",
+		googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
+		libraries,
+	});
 	const { register, handleSubmit, formState, setValue } = useZodForm({
 		schema: createSchema,
 		defaultValues: {
@@ -31,7 +43,34 @@ const ListingCreator: NextPage = () => {
 	const [width] = useWindowSize();
 	const [state, dispatch] = useReducer(reducer, initialState);
 
-	const mutation = trpc.proxy.listing.createListing.useMutation();
+	const createListingMutation = trpc.proxy.listing.createListing.useMutation();
+	const editListingMutation = trpc.proxy.listing.edit.useMutation();
+	const listingQuery = trpc.proxy.listing.get.useQuery(listingId, {
+		enabled: !!listingId,
+		onSuccess: (data) => {
+			if (!data) throw new Error(`Listing ${listingId} does not eexist`);
+			setValue("name", data.name);
+			setValue("guests", data.guests);
+			setValue("city", data.city);
+			setValue("longitude", data.longitude);
+			setValue("latitude", data.latitude);
+			setValue("description", data.description);
+			setValue("date_start", new Date());
+			setValue("date_end", new Date());
+			setMarker(
+				new google.maps.LatLng({
+					lat: data.latitude,
+					lng: data.longitude,
+				})
+			);
+			setCenter({
+				lat: data.latitude,
+				lng: data.longitude,
+			});
+			setImages(data.images.split("@@@"));
+			setMainImage(data.images.split("@@@")[0]!);
+		},
+	});
 
 	const [marker, setMarker] = useState<google.maps.LatLng | null>(null);
 	const [zoom, setZoom] = useState(7); // initial zoom
@@ -64,6 +103,7 @@ const ListingCreator: NextPage = () => {
 			return prev + "@@@" + curr;
 		}, main);
 		setValue("images", imageChain);
+		console.log(imageChain);
 	}, [setValue, mainImage, images]);
 
 	const addImage = useCallback((image: string) => {
@@ -109,11 +149,19 @@ const ListingCreator: NextPage = () => {
 		);
 	}
 
+	if (!!listingId && listingQuery.isLoading) {
+		return <Spinner />;
+	}
+
 	return (
 		<form
-			className="space-y-2 m-10 max-w-6xl xl:mx-auto"
+			className="space-y-2 m-10 max-w-6xl xl:mx-auto xl:min-w-[950px]"
 			onSubmit={handleSubmit((values) => {
-				mutation.mutate(values);
+				if (!!listingId) {
+					editListingMutation.mutate({ ...values, listingId });
+				} else {
+					createListingMutation.mutate(values);
+				}
 				router.push("/");
 			})}
 		>
@@ -123,28 +171,34 @@ const ListingCreator: NextPage = () => {
 						<label className="block text-sm font-medium text-gray-900 dark:text-gray-300 mb-2">
 							Dates
 						</label>
-						<div className="date-range-picker">
-							<DateRangeInput
-								onDatesChange={(data) => {
-									data.startDate && setValue("date_start", data.startDate);
-									data.endDate && setValue("date_end", data.endDate);
-									dispatch({ type: DATE_CHANGE, payload: data });
-								}}
-								onFocusChange={(focusedInput) =>
-									dispatch({ type: FOCUS_CHANGE, payload: focusedInput })
-								}
-								vertical={width! < 640}
-								showClose={false}
-								minBookingDays={2}
-								minBookingDate={new Date()}
-								startDate={state.startDate} // Date or null
-								endDate={state.endDate} // Date or null
-								focusedInput={state.focusedInput} // START_DATE, END_DATE or null
-							/>
-						</div>
-						{(formState.errors.date_start?.message ||
-							formState.errors.date_end?.message) && (
-							<p className="text-red-700">{"Select a valid date range!"}</p>
+						{!listingId ? (
+							<div className="date-range-picker">
+								<DateRangeInput
+									onDatesChange={(data) => {
+										data.startDate && setValue("date_start", data.startDate);
+										data.endDate && setValue("date_end", data.endDate);
+										dispatch({ type: DATE_CHANGE, payload: data });
+									}}
+									onFocusChange={(focusedInput) =>
+										dispatch({ type: FOCUS_CHANGE, payload: focusedInput })
+									}
+									vertical={width! < 640}
+									showClose={false}
+									minBookingDays={2}
+									minBookingDate={new Date()}
+									startDate={state.startDate} // Date or null
+									endDate={state.endDate} // Date or null
+									focusedInput={state.focusedInput} // START_DATE, END_DATE or null
+								/>
+								{(formState.errors.date_start?.message ||
+									formState.errors.date_end?.message) && (
+									<p className="text-red-700">{"Select a valid date range!"}</p>
+								)}
+							</div>
+						) : (
+							<div className="mb-1">
+								You can edit the availability only from the profile page!
+							</div>
 						)}
 					</div>
 					<div>
@@ -287,13 +341,12 @@ const ListingCreator: NextPage = () => {
 					</section>
 				</>
 			)}
-			{/* </div> */}
 			<button
 				type="submit"
-				disabled={mutation.isLoading}
+				disabled={createListingMutation.isLoading}
 				className="text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-1"
 			>
-				{mutation.isLoading ? "Loading" : "Submit"}
+				{createListingMutation.isLoading ? "Loading" : "Submit"}
 			</button>
 		</form>
 	);

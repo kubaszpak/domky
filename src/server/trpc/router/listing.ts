@@ -23,6 +23,11 @@ export const listingRouter = t.router({
 			},
 			include: {
 				availability: true,
+				reservations: {
+					include: {
+						dateRange: true,
+					},
+				},
 			},
 		});
 	}),
@@ -115,8 +120,6 @@ export const listingRouter = t.router({
 
 			if (ctx.session.user.id !== listing.userId) return;
 
-			// make sure there are no reservation collisions in the future
-
 			for (const reservation of listing.reservations) {
 				if (
 					reservation.status !== ReservationStatus.CONFIRMED ||
@@ -136,14 +139,42 @@ export const listingRouter = t.router({
 				}
 			}
 
-			// return await ctx.prisma.dateRange.update({
-			// 	where: {
-			// 		listingId: listing.id,
-			// 	},
-			// 	data: {
-			// 		start: input.dateStart,
-			// 		end: input.dateEnd,
-			// 	},
-			// });
+			return await ctx.prisma.dateRange.update({
+				where: {
+					listingId: listing.id,
+				},
+				data: {
+					start: input.dateStart,
+					end: input.dateEnd,
+				},
+			});
+		}),
+	edit: authedProcedure
+		.input(
+			createSchema.extend({
+				listingId: z.string(),
+			})
+		)
+		.mutation(async ({ ctx, input }) => {
+			const listing = await ctx.prisma.listing.findFirstOrThrow({
+				where: {
+					id: input.listingId,
+				},
+			});
+
+			if (ctx.session.user.id !== listing.userId) {
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "Not authorized to edit this listing!",
+				});
+			}
+			const { date_start, date_end, listingId, ...data } = input;
+
+			return await ctx.prisma.listing.update({
+				where: {
+					id: listingId,
+				},
+				data,
+			});
 		}),
 });

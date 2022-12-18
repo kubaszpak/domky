@@ -7,17 +7,29 @@ import {
 import { trpc } from "@/utils/trpc";
 import useWindowSize from "@/utils/use_window_size";
 import { DateRangeInput } from "@datepicker-react/styled";
-import { DateRange, Listing } from "@prisma/client";
+import {
+	DateRange,
+	Listing,
+	Reservation,
+	ReservationStatus,
+} from "@prisma/client";
 import { Modal, Table } from "flowbite-react";
 import { NextPage } from "next";
 import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
+import Link from "next/link";
 import { useReducer, useState } from "react";
 import { BsCalendar3 } from "react-icons/bs";
 import { IoMdCalendar } from "react-icons/io";
 
 interface ModalInfo {
-	listing: Listing & { availability: DateRange | null };
+	listing: Listing & {
+		availability: DateRange | null;
+		reservations: (Reservation & {
+			dateRange: DateRange;
+		})[];
+	};
+	unavailableDates: Date[];
 }
 
 const Profile: NextPage = () => {
@@ -28,14 +40,40 @@ const Profile: NextPage = () => {
 
 	const listings = trpc.proxy.listing.me.useQuery();
 	const reservations = trpc.proxy.reservation.me.useQuery();
-	const changeDateMutation =
-		trpc.proxy.listing.changeAvailability.useMutation();
+	const changeDateMutation = trpc.proxy.listing.changeAvailability.useMutation({
+		onError: () => {
+			!!modalInfo &&
+				dispatch({
+					type: DATE_CHANGE,
+					payload: {
+						startDate: modalInfo.listing.availability!.start,
+						endDate: modalInfo.listing.availability!.end,
+						focusedInput: null,
+					},
+				});
+		},
+	});
 
-	// console.log(
-	// 	changeDateMutation.error,
-	// 	changeDateMutation.data,
-	// 	changeDateMutation.status
-	// );
+	const getUnavailableDates = (
+		reservations: (Reservation & {
+			dateRange: DateRange;
+		})[]
+	) => {
+		const dates: Date[] = [];
+		for (const reservation of reservations) {
+			if (reservation.status !== ReservationStatus.CONFIRMED) continue;
+			for (
+				let d = reservation.dateRange.start;
+				d <= reservation.dateRange.end;
+				d.setDate(d.getDate() + 1)
+			) {
+				console.log(d);
+				dates.push(new Date(d));
+			}
+		}
+		console.log(dates);
+		return dates;
+	};
 
 	if (status !== "authenticated") {
 		return (
@@ -63,21 +101,21 @@ const Profile: NextPage = () => {
 					</Table.Head>
 					<Table.Body className="divide-y">
 						{listings.data &&
-							listings.data.map((listing, idx) => (
+							listings.data.map((listing) => (
 								<Table.Row
-									key={idx}
+									key={listing.id}
 									className="bg-white dark:border-gray-700 dark:bg-gray-800 [&>*]:text-center"
 								>
 									<Table.Cell>{listing.status}</Table.Cell>
 									<Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
 										{listing.name}
 									</Table.Cell>
-									<Table.Cell>
+									<Table.Cell className="override-padding-0">
 										<Image
 											src={`https://res.cloudinary.com/${
 												process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
 											}/image/upload/${listing.images.split("@@@")[0]}`}
-											alt={`Apartment ${idx}`}
+											alt={`Apartment ${listing.id}`}
 											height={162}
 											width={288}
 										/>
@@ -96,15 +134,23 @@ const Profile: NextPage = () => {
 															focusedInput: null,
 														},
 													});
-													setModalInfo({ listing: listing });
+													setModalInfo({
+														listing: listing,
+														unavailableDates: getUnavailableDates(
+															listing.reservations
+														),
+													});
 												}}
 											/>
 										</div>
 									</Table.Cell>
 									<Table.Cell>
-										<a className="font-medium text-blue-600 hover:underline dark:text-blue-500">
+										<Link
+											href={`/edit/${listing.id}`}
+											className="font-medium text-blue-600 hover:underline dark:text-blue-500"
+										>
 											Edit
-										</a>
+										</Link>
 									</Table.Cell>
 								</Table.Row>
 							))}
@@ -137,7 +183,7 @@ const Profile: NextPage = () => {
 									<Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
 										{reservation.listing.name}
 									</Table.Cell>
-									<Table.Cell>
+									<Table.Cell className="p-0">
 										<Image
 											src={`https://res.cloudinary.com/${
 												process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
@@ -166,7 +212,13 @@ const Profile: NextPage = () => {
 				)}
 			</div>
 			{!!modalInfo && (
-				<Modal show={!!modalInfo} onClose={() => setModalInfo(null)}>
+				<Modal
+					show={!!modalInfo}
+					onClose={() => {
+						changeDateMutation.reset();
+						setModalInfo(null);
+					}}
+				>
 					<Modal.Header>Availability</Modal.Header>
 					<Modal.Body>
 						<div className="space-y-6">
@@ -180,6 +232,7 @@ const Profile: NextPage = () => {
 									}
 									vertical={width! < 640}
 									showClose={false}
+									unavailableDates={modalInfo.unavailableDates}
 									minBookingDays={2}
 									minBookingDate={new Date()}
 									startDate={state.startDate}
@@ -190,6 +243,12 @@ const Profile: NextPage = () => {
 						</div>
 					</Modal.Body>
 					<Modal.Footer>
+						{changeDateMutation.isError && (
+							<p className="text-red-700">{changeDateMutation.error.message}</p>
+						)}
+						{changeDateMutation.isSuccess && (
+							<p className="text-red-700">Successfully updated availability!</p>
+						)}
 						<button
 							className="text-white bg-gradient-to-r from-cyan-500 to-blue-500 enabled:hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-semibold rounded-lg text-sm px-5 py-2.5 text-center my-1 disabled:grayscale"
 							onClick={() =>
@@ -197,7 +256,6 @@ const Profile: NextPage = () => {
 									listingId: modalInfo.listing.id,
 									dateStart: state.startDate!,
 									dateEnd: state.endDate!,
-									// TODO: add blocking dates to GUI datePicker and handle error
 								})
 							}
 							disabled={

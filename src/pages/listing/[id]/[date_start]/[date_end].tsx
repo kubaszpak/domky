@@ -5,13 +5,14 @@ import { dates } from "@/types/dates";
 import { trpc } from "@/utils/trpc";
 import { Wrapper } from "@googlemaps/react-wrapper";
 import { Carousel, Spinner } from "flowbite-react";
+import { NextPage } from "next";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { BsFillPeopleFill } from "react-icons/bs";
 import { z } from "zod";
 
-function Listing() {
+const Listing: NextPage = () => {
 	const router = useRouter();
 	const { query, isReady } = router;
 	const { id, date_start, date_end } = query;
@@ -56,7 +57,7 @@ function Listing() {
 	const end = data.availability?.end;
 	const marker = { lat: data.latitude, lng: data.longitude };
 
-	if (today > end!) return;
+	if (today > end!) return <Spinner />;
 
 	return (
 		<div>
@@ -128,6 +129,6 @@ function Listing() {
 			</div>
 		</div>
 	);
-}
+};
 
 export default Listing;

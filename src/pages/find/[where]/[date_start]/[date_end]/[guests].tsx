@@ -8,8 +8,9 @@ import { BsFillPeopleFill } from "react-icons/bs";
 import Link from "next/link";
 import { Spinner } from "flowbite-react";
 import { dates } from "@/types/dates";
+import { NextPage } from "next";
 
-const Find = () => {
+const Find: NextPage = () => {
 	const today = new Date();
 	const { query, isReady } = useRouter();
 	const { where, guests, date_start, date_end } = query;

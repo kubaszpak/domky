@@ -96,3 +96,9 @@ div#__next > div {
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
+
+@media (max-width: 768px) {
+	.override-padding-0 {
+		padding: 0 !important;
+	}
+}

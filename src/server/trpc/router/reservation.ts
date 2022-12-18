@@ -8,7 +8,7 @@ export const reservationRouter = t.router({
 				userId: ctx.session.user.id,
 			},
 			include: {
-				listing: true
+				listing: true,
 			}
 		});
 	}),
