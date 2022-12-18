@@ -2,7 +2,7 @@ import useWindowSize from "@/utils/use_window_size";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { BiMessageDetail } from "react-icons/bi";
+import { BiLogOut, BiMessageDetail } from "react-icons/bi";
 
 export default function Navbar() {
 	const { status, data: session } = useSession();
@@ -42,17 +42,14 @@ export default function Navbar() {
 								)}
 							</a>
 						</Link>
-						<Link href={"/create"}>
-							<a>
-								<b>Create</b>
-							</a>
-						</Link>
 						<Link href={"/chat"}>
 							<a>
 								<BiMessageDetail />
 							</a>
 						</Link>
-						<button onClick={() => signOut()}>Sign out</button>
+						<button onClick={() => signOut()}>
+							{width! > 640 ? <>Sign out</> : <BiLogOut />}
+						</button>
 					</>
 				) : (
 					<button onClick={() => signIn()}>Sign in</button>

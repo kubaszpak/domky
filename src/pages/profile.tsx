@@ -79,107 +79,118 @@ const Profile: NextPage = () => {
 	};
 
 	if (status !== "authenticated") {
-		return (
-			<SignIn />
-		);
+		return <SignIn />;
 	}
 
 	return (
 		<>
 			<div className="container mx-auto my-5 px-3">
-				<h1 className="text-2xl font-semibold text-gray-700 my-3">Listings</h1>
-				<Table hoverable={true}>
-					<Table.Head className="[&>*]:text-center">
-						<Table.HeadCell>Status</Table.HeadCell>
-						<Table.HeadCell>Listings</Table.HeadCell>
-						<Table.HeadCell>Main image</Table.HeadCell>
-						<Table.HeadCell>Guests</Table.HeadCell>
-						<Table.HeadCell>Availability</Table.HeadCell>
-						<Table.HeadCell>Reservations</Table.HeadCell>
-						<Table.HeadCell>
-							<span className="sr-only">Edit</span>
-						</Table.HeadCell>
-					</Table.Head>
-					<Table.Body className="divide-y">
-						{listings.data &&
-							listings.data.map((listing) => (
-								<Table.Row
-									key={listing.id}
-									className="bg-white dark:border-gray-700 dark:bg-gray-800 [&>*]:text-center"
-								>
-									<Table.Cell>{listing.status}</Table.Cell>
-									<Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-										{listing.name}
-									</Table.Cell>
-									<Table.Cell className="override-padding-0">
-										<Image
-											src={`https://res.cloudinary.com/${
-												process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
-											}/image/upload/${listing.images.split("@@@")[0]}`}
-											alt={`Apartment ${listing.id}`}
-											height={162}
-											width={288}
-										/>
-									</Table.Cell>
-									<Table.Cell>{listing.guests}</Table.Cell>
-									<Table.Cell>
-										<div className="flex justify-center cursor-pointer">
-											<BsCalendar3
-												size={28}
-												onClick={() => {
-													dispatch({
-														type: DATE_CHANGE,
-														payload: {
-															startDate: listing.availability!.start,
-															endDate: listing.availability!.end,
-															focusedInput: null,
-														},
-													});
-													setModalInfo({
-														listing: listing,
-														unavailableDates: getUnavailableDates(
-															listing.reservations
-														),
-													});
-												}}
-											/>
-										</div>
-									</Table.Cell>
-									<Table.Cell>
-										<div className="flex justify-center cursor-pointer">
-											<BsListUl
-												size={28}
-												onClick={() => {
-													setShowReservationsModal(true);
-												}}
-											/>
-										</div>
-										<ReservationsModal
-											listingId={listing.id}
-											show={showReservationsModal}
-											set={setShowReservationsModal}
-										/>
-									</Table.Cell>
-									<Table.Cell>
-										<Link
-											href={`/edit/${listing.id}`}
-											className="font-medium text-blue-600 hover:underline dark:text-blue-500"
-										>
-											Edit
-										</Link>
-									</Table.Cell>
-								</Table.Row>
-							))}
-					</Table.Body>
-				</Table>
-				<div className="mt-5">
-					<h1 className="text-2xl font-semibold text-gray-700 my-3">
-						Reservations
-					</h1>
-					{reservations.data && (
-						<ReservationList reservations={reservations.data} />
-					)}
+				<div className="flex justify-end pr-3">
+					<button
+						type="button"
+						className="text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center my-3"
+					>
+						<Link href="/create">Create a listing</Link>
+					</button>
 				</div>
+				{listings.data && listings.data.length > 0 && (
+					<>
+						<h1 className="text-2xl font-semibold text-gray-700 my-3">
+							Listings
+						</h1>
+						<Table hoverable={true}>
+							<Table.Head className="[&>*]:text-center">
+								<Table.HeadCell>Status</Table.HeadCell>
+								<Table.HeadCell>Listings</Table.HeadCell>
+								<Table.HeadCell>Main image</Table.HeadCell>
+								<Table.HeadCell>Guests</Table.HeadCell>
+								<Table.HeadCell>Availability</Table.HeadCell>
+								<Table.HeadCell>Reservations</Table.HeadCell>
+								<Table.HeadCell>
+									<span className="sr-only">Edit</span>
+								</Table.HeadCell>
+							</Table.Head>
+							<Table.Body className="divide-y">
+								{listings.data.map((listing) => (
+									<Table.Row
+										key={listing.id}
+										className="bg-white dark:border-gray-700 dark:bg-gray-800 [&>*]:text-center"
+									>
+										<Table.Cell>{listing.status}</Table.Cell>
+										<Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+											{listing.name}
+										</Table.Cell>
+										<Table.Cell className="override-padding-0">
+											<Image
+												src={`https://res.cloudinary.com/${
+													process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+												}/image/upload/${listing.images.split("@@@")[0]}`}
+												alt={`Apartment ${listing.id}`}
+												height={162}
+												width={288}
+											/>
+										</Table.Cell>
+										<Table.Cell>{listing.guests}</Table.Cell>
+										<Table.Cell>
+											<div className="flex justify-center cursor-pointer">
+												<BsCalendar3
+													size={28}
+													onClick={() => {
+														dispatch({
+															type: DATE_CHANGE,
+															payload: {
+																startDate: listing.availability!.start,
+																endDate: listing.availability!.end,
+																focusedInput: null,
+															},
+														});
+														setModalInfo({
+															listing: listing,
+															unavailableDates: getUnavailableDates(
+																listing.reservations
+															),
+														});
+													}}
+												/>
+											</div>
+										</Table.Cell>
+										<Table.Cell>
+											<div className="flex justify-center cursor-pointer">
+												<BsListUl
+													size={28}
+													onClick={() => {
+														setShowReservationsModal(true);
+													}}
+												/>
+											</div>
+											<ReservationsModal
+												listingId={listing.id}
+												show={showReservationsModal}
+												set={setShowReservationsModal}
+											/>
+										</Table.Cell>
+										<Table.Cell>
+											<Link
+												href={`/edit/${listing.id}`}
+												className="font-medium text-blue-600 hover:underline dark:text-blue-500"
+											>
+												Edit
+											</Link>
+										</Table.Cell>
+									</Table.Row>
+								))}
+							</Table.Body>
+						</Table>
+					</>
+				)}
+				{reservations.data && reservations.data.length > 0 && (
+					<div className="mt-5">
+						<h1 className="text-2xl font-semibold text-gray-700 my-3">
+							Reservations
+						</h1>
+						<ReservationList reservations={reservations.data} />
+					</div>
+				)}
 			</div>
 			{!!modalInfo && (
 				<Modal
