@@ -1,4 +1,3 @@
-import { Spinner } from "flowbite-react";
 import { GetServerSideProps, NextPage } from "next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
 import { signIn, useSession } from "next-auth/react";
@@ -11,6 +10,8 @@ import ChatsList from "@/components/chat/chats_list";
 import Pusher from "pusher-js";
 import axios from "axios";
 import { trpc } from "@/utils/trpc";
+import Spinner from "@/components/spinner";
+import SignIn from "@/components/sign_in";
 
 let pusher: Pusher;
 const Chat: NextPage<{ chats: string }> = ({ chats }) => {
@@ -61,25 +62,11 @@ const Chat: NextPage<{ chats: string }> = ({ chats }) => {
 	}, [status, session, refetchQuery]);
 
 	if (status === "loading") {
-		return (
-			<div className="flex justify-center items-center flex-auto">
-				<Spinner size="lg" />
-			</div>
-		);
+		return <Spinner />;
 	}
 
 	if (status !== "authenticated") {
-		return (
-			<div className="p-5">
-				<h1>Sign in first to view this page!</h1>
-				<button
-					className="text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-semibold rounded-lg text-sm px-5 py-2.5 text-center my-1"
-					onClick={() => signIn()}
-				>
-					Sign in
-				</button>
-			</div>
-		);
+		return <SignIn />;
 	}
 
 	const emitPrivateMessage = (userId: string, message: string) => {

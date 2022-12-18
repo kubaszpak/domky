@@ -1,10 +1,11 @@
 import ContactForm from "@/components/contact_form";
 import Map from "@/components/maps/map";
 import Marker from "@/components/maps/marker";
+import Spinner from "@/components/spinner";
 import { dates } from "@/types/dates";
 import { trpc } from "@/utils/trpc";
 import { Wrapper } from "@googlemaps/react-wrapper";
-import { Carousel, Spinner } from "flowbite-react";
+import { Carousel } from "flowbite-react";
 import { NextPage } from "next";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -44,9 +45,7 @@ const Listing: NextPage = () => {
 
 	if (!getQuery.isSuccess || !getQuery.data || !parsedParams)
 		return (
-			<div className="h-full w-full flex flex-auto justify-center items-center">
-				<Spinner aria-label="Loading" size="xl" />
-			</div>
+			<Spinner />
 		);
 
 	const data = getQuery.data;

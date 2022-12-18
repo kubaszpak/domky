@@ -2,9 +2,10 @@ import { dates } from "@/types/dates";
 import { trpc } from "@/utils/trpc";
 import { DateRange, Listing } from "@prisma/client";
 import { Modal } from "flowbite-react";
-import { signIn, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import React, { useState } from "react";
 import BookingPreview from "./listing/booking_preview";
+import SignIn from "./sign_in";
 
 interface ContactFormProps {
 	showModal: boolean;
@@ -81,15 +82,7 @@ function ContactForm({
 					</Modal.Body>
 				</div>
 			) : (
-				<div className="p-5">
-					<h1>Sign in first to view this page!</h1>
-					<button
-						className="text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-semibold rounded-lg text-sm px-5 py-2.5 text-center my-1"
-						onClick={() => signIn()}
-					>
-						Sign in
-					</button>
-				</div>
+				<SignIn />
 			)}
 		</Modal>
 	);

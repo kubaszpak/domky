@@ -6,9 +6,9 @@ import React, { useEffect, useState } from "react";
 import { z } from "zod";
 import { BsFillPeopleFill } from "react-icons/bs";
 import Link from "next/link";
-import { Spinner } from "flowbite-react";
 import { dates } from "@/types/dates";
 import { NextPage } from "next";
+import Spinner from "@/components/spinner";
 
 const Find: NextPage = () => {
 	const today = new Date();
@@ -38,9 +38,7 @@ const Find: NextPage = () => {
 
 	if (searchQuery.isFetching)
 		return (
-			<div className="h-full flex flex-auto justify-center items-center">
-				<Spinner aria-label="Loading" size="xl" />
-			</div>
+			<Spinner />
 		);
 
 	return (

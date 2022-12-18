@@ -6,7 +6,7 @@ import { useCallback, useEffect, useReducer, useState } from "react";
 import { Wrapper } from "@googlemaps/react-wrapper";
 import Map from "@/components/maps/map";
 import Marker from "@/components/maps/marker";
-import { signIn, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import UploadWidget from "@/components/cloudinary/upload_widget";
 import Image from "next/image";
 import {
@@ -20,6 +20,7 @@ import useWindowSize from "@/utils/use_window_size";
 import { useRouter } from "next/router";
 import Spinner from "@/components/spinner";
 import { useLoadScript } from "@react-google-maps/api";
+import SignIn from "@/components/sign_in";
 
 interface Props {
 	parsedId: string;
@@ -140,17 +141,12 @@ const ListingCreator: NextPage<Props> = ({ parsedId: listingId }) => {
 		geocode();
 	}, [marker, setValue]);
 
-	if (status !== "authenticated") {
-		return (
-			<>
-				<p>Sign in first to view this page!</p>
-				<button onClick={() => signIn()}>Sign in</button>
-			</>
-		);
-	}
-
 	if (!!listingId && listingQuery.isLoading) {
 		return <Spinner />;
+	}
+
+	if (status !== "authenticated") {
+		return <SignIn />;
 	}
 
 	return (
