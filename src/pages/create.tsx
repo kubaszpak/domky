@@ -104,7 +104,6 @@ const ListingCreator: NextPage<Props> = ({ parsedId: listingId }) => {
 			return prev + "@@@" + curr;
 		}, main);
 		setValue("images", imageChain);
-		console.log(imageChain);
 	}, [setValue, mainImage, images]);
 
 	const addImage = useCallback((image: string) => {

@@ -4,7 +4,7 @@ import { z } from "zod";
 export const createSchema = z.object({
 	name: z.string(),
 	guests: z.number().min(1).max(10),
-	description: z.string(),
+	description: z.string().max(191),
 	longitude: z.number(),
 	latitude: z.number(),
 	date_start: z.date(),
@@ -24,7 +24,7 @@ const statusType = z.nativeEnum(ReservationStatus);
 
 export const updateReservationStatusSchema = z.object({
 	reservationId: z.string(),
-	listingOwnerId: z.string(),
+	listingId: z.string(),
 	status: statusType,
 });
 

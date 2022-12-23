@@ -59,6 +59,7 @@ export const listingRouter = t.router({
 			return await ctx.prisma.listing.findMany({
 				where: {
 					city: input.where,
+					status: ListingStatus.ACTIVE,
 					availability: {
 						start: {
 							lte: input.date_start,

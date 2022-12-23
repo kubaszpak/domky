@@ -1,4 +1,5 @@
 import { PrismaClient, Prisma } from "@prisma/client";
+import { inferAsyncReturnType } from "@trpc/server";
 import { z } from "zod";
 import { t, authedProcedure } from "../utils";
 
@@ -33,9 +34,9 @@ export async function fetchUsers(
 						include: {
 							listing: true,
 							dateRange: true,
-						}
+						},
 					},
-				}
+				},
 			},
 			users: {
 				include: {
@@ -58,6 +59,8 @@ export async function fetchUsers(
 
 	return chatsWithSortedMessages;
 }
+
+export type fetchUserReturnType = inferAsyncReturnType<typeof fetchUsers>;
 
 export const messageRouter = t.router({
 	contact: authedProcedure

@@ -70,11 +70,9 @@ const Profile: NextPage = () => {
 				d <= reservation.dateRange.end;
 				d.setDate(d.getDate() + 1)
 			) {
-				console.log(d);
 				dates.push(new Date(d));
 			}
 		}
-		console.log(dates);
 		return dates;
 	};
 
