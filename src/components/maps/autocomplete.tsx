@@ -35,7 +35,7 @@ const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps>(
 		};
 
 		const clearRef = useOnclickOutside(() => {
-			// clearSuggestions();
+			clearSuggestions();
 		});
 
 		return (
