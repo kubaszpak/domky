@@ -1,4 +1,4 @@
-import React, { Fragment, MutableRefObject, Ref, useState } from "react";
+import React from "react";
 import usePlacesAutocomplete from "use-places-autocomplete";
 import useOnclickOutside from "react-cool-onclickoutside";
 
@@ -56,7 +56,6 @@ const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps>(
 					placeholder="Where"
 					required
 					autoComplete={"off"}
-					// onKeyDown={(e) => {}}
 					onChange={(e) => {
 						setValue(e.target.value);
 						onChange(e.target.value);

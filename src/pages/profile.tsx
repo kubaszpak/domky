@@ -161,11 +161,13 @@ const Profile: NextPage = () => {
 													}}
 												/>
 											</div>
-											<ReservationsModal
-												listingId={listing.id}
-												show={showReservationsModal}
-												set={setShowReservationsModal}
-											/>
+											{showReservationsModal && (
+												<ReservationsModal
+													listingId={listing.id}
+													show={showReservationsModal}
+													set={setShowReservationsModal}
+												/>
+											)}
 										</Table.Cell>
 										<Table.Cell>
 											<Link
