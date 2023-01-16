@@ -1,3 +1,4 @@
+import { ReservationsModalInfo } from "@/pages/profile";
 import { trpc } from "@/utils/trpc";
 import { Modal } from "flowbite-react";
 import React, { Dispatch, SetStateAction } from "react";
@@ -6,7 +7,7 @@ import ReservationList from "./reservation_list";
 interface Props {
 	listingId: string;
 	show: boolean;
-	set: Dispatch<SetStateAction<boolean>>;
+	set: Dispatch<SetStateAction<ReservationsModalInfo>>;
 }
 
 const ReservationsModal: React.FC<Props> = ({ listingId, show, set }) => {
@@ -18,7 +19,7 @@ const ReservationsModal: React.FC<Props> = ({ listingId, show, set }) => {
 		<Modal
 			show={show}
 			onClose={() => {
-				set(false);
+				set({ show: false, listingId: undefined });
 			}}
 		>
 			<Modal.Header>Reservations</Modal.Header>

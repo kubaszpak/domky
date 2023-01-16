@@ -34,12 +34,21 @@ interface ModalInfo {
 	unavailableDates: Date[];
 }
 
+export interface ReservationsModalInfo {
+	show: boolean;
+	listingId: string | undefined;
+}
+
 const Profile: NextPage = () => {
 	const { status } = useSession();
 	const [width] = useWindowSize();
 	const [state, dispatch] = useReducer(reducer, initialState);
 	const [modalInfo, setModalInfo] = useState<ModalInfo | null>(null);
-	const [showReservationsModal, setShowReservationsModal] = useState(false);
+	const [reservationsModalInfo, setReservationsModalInfo] =
+		useState<ReservationsModalInfo>({
+			show: false,
+			listingId: undefined,
+		});
 
 	const listings = trpc.proxy.listing.me.useQuery();
 	const reservations = trpc.proxy.reservation.me.useQuery();
@@ -157,17 +166,13 @@ const Profile: NextPage = () => {
 												<BsListUl
 													size={28}
 													onClick={() => {
-														setShowReservationsModal(true);
+														setReservationsModalInfo({
+															show: true,
+															listingId: listing.id,
+														});
 													}}
 												/>
 											</div>
-											{showReservationsModal && (
-												<ReservationsModal
-													listingId={listing.id}
-													show={showReservationsModal}
-													set={setShowReservationsModal}
-												/>
-											)}
 										</Table.Cell>
 										<Table.Cell>
 											<Link
@@ -181,6 +186,13 @@ const Profile: NextPage = () => {
 								))}
 							</Table.Body>
 						</Table>
+						{reservationsModalInfo.show && (
+							<ReservationsModal
+								show={reservationsModalInfo.show}
+								listingId={reservationsModalInfo.listingId!}
+								set={setReservationsModalInfo}
+							/>
+						)}
 					</>
 				)}
 				{reservations.data && reservations.data.length > 0 && (
