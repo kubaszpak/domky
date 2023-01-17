@@ -240,7 +240,9 @@ const Profile: NextPage = () => {
 							<p className="text-red-700">{changeDateMutation.error.message}</p>
 						)}
 						{changeDateMutation.isSuccess && (
-							<p className="text-red-700">Successfully updated availability!</p>
+							<p className="text-green-500">
+								Successfully updated availability!
+							</p>
 						)}
 						<button
 							className="text-white bg-gradient-to-r from-cyan-500 to-blue-500 enabled:hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-semibold rounded-lg text-sm px-5 py-2.5 text-center my-1 disabled:grayscale"
