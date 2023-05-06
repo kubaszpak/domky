@@ -91,7 +91,7 @@ model Listing {
     reservations Reservation[]
     images       String        @default("")
     guests       Int
-    description  String
+    description  String        @db.Text
     latitude     Float
     longitude    Float
     city         String
@@ -145,7 +145,7 @@ model Message {
     id            String       @id @default(cuid())
     senderId      String
     sender        User         @relation(fields: [senderId], references: [id])
-    content       String
+    content       String       @db.Text
     reservationId String?
     reservation   Reservation? @relation(fields: [reservationId], references: [id])
     chatId        String
