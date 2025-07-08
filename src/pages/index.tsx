@@ -125,7 +125,7 @@ const Home: NextPage = () => {
 				</div>
 				<div className="ml-3 text-sm font-normal px-1">
 					<Link
-						href="/find/Warszawa/Tue,%2031%20Oct%202023%2023:00:00%20GMT/Thu,%2009%20Nov%202023%2023:00:00%20GMT/2"
+						href="/find/Warszawa/Sat,%2031%20Oct%202026%2023:00:00%20GMT/Mon,%2009%20Nov%202026%2023:00:00%20GMT/2"
 						passHref
 					>
 						<a className="text-blue-300 font-semibold">Click here</a>
