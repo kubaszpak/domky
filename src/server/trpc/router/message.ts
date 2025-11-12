@@ -12,11 +12,7 @@ const sendSchema = z.object({
 });
 
 export async function fetchUsers(
-	prisma: PrismaClient<
-		Prisma.PrismaClientOptions,
-		never,
-		Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined
-	>,
+	prisma: PrismaClient,
 	id: string
 ) {
 	const chats = await prisma.chat.findMany({
